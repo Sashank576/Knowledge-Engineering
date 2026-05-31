@@ -1,7 +1,7 @@
 from dash import html, dcc
 import plotly.graph_objects as go
 import json
-from collections import Counter
+from collections import Counter, defaultdict
 
 # Data lives here — swap for a real source if needed
 BOROUGH_DATA = {
@@ -50,12 +50,12 @@ INDICATOR_LABELS = {
 
 LEVEL_COLORS = {
     "low":    "#4caf50",
-    "medium": "#ffeb3b",
+    "medium": "#f5a623",
     "high":   "#f44336",
 }
 
 # One trace per level — order here = legend order, guaranteed
-MAP_INDICATOR_COLORS = [
+LEVELS = [
     ("low",    "#4caf50", "Low"),
     ("medium", "#ffeb3b", "Medium"),
     ("high",   "#f44336", "High"),
@@ -84,7 +84,7 @@ def build_cooccurrence_overlay(indicator: str) -> html.Div:
             f"{level.capitalize()} {count}/{total}",
             style={
                 "backgroundColor": LEVEL_COLORS[level],
-                "color": "#000",
+                "color": "#fff" if level in ("high", "medium") else "#333",
                 "borderRadius": "4px",
                 "padding": "1px 7px",
                 "fontSize": "11px",
@@ -152,7 +152,54 @@ def build_cooccurrence_overlay(indicator: str) -> html.Div:
     )
 
 
-def build_figure(geojson, indicator: str):
+
+# Zoom level at which we switch from borough clusters to individual dots
+INDIVIDUAL_ZOOM_THRESHOLD = 13
+
+
+def cluster_listings(listings: list[dict], zoom: float) -> list[dict]:
+    """
+    Borough-based clustering. Below INDIVIDUAL_ZOOM_THRESHOLD all listings in
+    the same borough are collapsed into one dot placed at their centroid, sized
+    by count. Above the threshold every listing is shown individually.
+    Each listing dict must have "lat", "lon", and "borough" keys.
+    """
+    if zoom >= INDIVIDUAL_ZOOM_THRESHOLD:
+        return [
+            {
+                "lat":  l["lat"],
+                "lon":  l["lon"],
+                "text": l.get("name", "Airbnb listing"),
+                "size": 6,
+            }
+            for l in listings
+        ]
+
+    buckets: dict[str, list] = defaultdict(list)
+    for l in listings:
+        buckets[l.get("borough", "Unknown")].append(l)
+
+    points = []
+    for borough, members in buckets.items():
+        avg_lat = sum(m["lat"] for m in members) / len(members)
+        avg_lon = sum(m["lon"] for m in members) / len(members)
+        count   = len(members)
+        # Scale dot size: min 12 for small clusters, up to 40 for large ones
+        size = min(12 + (count ** 0.4) * 3, 40)
+        points.append({
+            "lat":  avg_lat,
+            "lon":  avg_lon,
+            "text": str(count),
+            "size": size,
+        })
+
+    return points
+
+def build_figure(geojson, indicator: str, airbnb_listings: list[dict] | None = None, zoom: float = 9, center: dict | None = None):
+    """
+    airbnb_listings: list of dicts with keys "lat", "lon", and optionally "name"
+    e.g. [{"lat": 51.51, "lon": -0.12, "name": "Cosy flat in Hackney"}, ...]
+    """
     # Bucket boroughs by level
     buckets = {"low": [], "medium": [], "high": []}
     for feature in geojson["features"]:
@@ -165,7 +212,7 @@ def build_figure(geojson, indicator: str):
 
     fig = go.Figure()
 
-    for level, colour, label in MAP_INDICATOR_COLORS:
+    for level, colour, label in LEVELS:
         boroughs = buckets[level]
         fig.add_trace(
             go.Choroplethmapbox(
@@ -187,10 +234,43 @@ def build_figure(geojson, indicator: str):
             )
         )
 
+    # Airbnb listings dot layer — pass airbnb_listings to enable
+    if airbnb_listings:
+        points = cluster_listings(airbnb_listings, zoom)
+        is_clustered = zoom < INDIVIDUAL_ZOOM_THRESHOLD
+
+        lats   = [p["lat"]   for p in points]
+        lons   = [p["lon"]   for p in points]
+        texts  = [p["text"]  for p in points]
+        sizes  = [p["size"]  for p in points]
+
+        fig.add_trace(
+            go.Scattermapbox(
+                name="Airbnb listings",
+                lat=lats,
+                lon=lons,
+                mode="markers+text" if is_clustered else "markers",
+                marker=dict(
+                    size=sizes,
+                    color="#0077ff",   # blue
+                    opacity=0.7,
+                ),
+                text=texts,
+                textfont=dict(size=10, color="#fff"),
+                textposition="middle center",
+                hovertemplate=(
+                    "<b>%{text} listings</b><extra></extra>"
+                    if is_clustered else
+                    "<b>%{text}</b><br>%{lat:.4f}, %{lon:.4f}<extra></extra>"
+                ),
+                showlegend=True,
+            )
+        )
+
     fig.update_layout(
         mapbox_style="white-bg",
-        mapbox_zoom=9,
-        mapbox_center={"lat": 51.5074, "lon": -0.1278},
+        mapbox_zoom=zoom,
+        mapbox_center=center if center else {"lat": 51.5074, "lon": -0.1278},
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         legend=dict(
             title=dict(text="Indicator"),
@@ -217,6 +297,7 @@ def render(indicator: str = "transportation_indicator"):
                 id="choropleth-map",
                 figure=fig,
                 style={"height": "100%"},
+                config={"scrollZoom": True},
             ),
         ]
     )
