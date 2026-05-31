@@ -21,12 +21,15 @@ app.layout = html.Div(
 
 @callback(
     Output("choropleth-map", "figure"),
+    Output("cooccurrence-overlay", "children"),
     Input("indicator-dropdown", "value"),
 )
 def update_map(indicator):
     with open("assets/london_boroughs.geojson") as f:
         geojson = json.load(f)
-    return map_column.build_figure(geojson, indicator)
+    fig = map_column.build_figure(geojson, indicator)
+    overlay_children = map_column.build_cooccurrence_overlay(indicator).children
+    return fig, overlay_children
 
 
 if __name__ == "__main__":

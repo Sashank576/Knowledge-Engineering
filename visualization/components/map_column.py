@@ -1,6 +1,7 @@
 from dash import html, dcc
 import plotly.graph_objects as go
 import json
+from collections import Counter
 
 # Data lives here — swap for a real source if needed
 BOROUGH_DATA = {
@@ -39,12 +40,116 @@ BOROUGH_DATA = {
     "Westminster":           {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
 }
 
+ALL_INDICATORS = ["transportation_indicator", "airbnb_pressure_indicator", "housing_indicator"]
+
+INDICATOR_LABELS = {
+    "transportation_indicator":   "Transport",
+    "airbnb_pressure_indicator":  "Airbnb Pressure",
+    "housing_indicator":          "Housing",
+}
+
+LEVEL_COLORS = {
+    "low":    "#4caf50",
+    "medium": "#ffeb3b",
+    "high":   "#f44336",
+}
+
 # One trace per level — order here = legend order, guaranteed
-LEVELS = [
+MAP_INDICATOR_COLORS = [
     ("low",    "#4caf50", "Low"),
     ("medium", "#ffeb3b", "Medium"),
     ("high",   "#f44336", "High"),
 ]
+
+
+def build_cooccurrence_overlay(indicator: str) -> html.Div:
+    """
+    For boroughs where `indicator` == 'high', count how the OTHER
+    two indicators are distributed across low / medium / high.
+    """
+    other_indicators = [i for i in ALL_INDICATORS if i != indicator]
+
+    # Collect only the high-pressure boroughs
+    high_boroughs = [
+        data for data in BOROUGH_DATA.values()
+        if data.get(indicator) == "high"
+    ]
+    total = len(high_boroughs)
+
+    if total == 0:
+        return html.Div()
+
+    def level_pill(level: str, count: int, total: int) -> html.Span:
+        return html.Span(
+            f"{level.capitalize()} {count}/{total}",
+            style={
+                "backgroundColor": LEVEL_COLORS[level],
+                "color": "#000",
+                "borderRadius": "4px",
+                "padding": "1px 7px",
+                "fontSize": "11px",
+                "fontWeight": "600",
+                "marginRight": "4px",
+            }
+        )
+
+    rows = []
+    for ind in other_indicators:
+        counts = Counter(b[ind] for b in high_boroughs)
+        pills = [
+            level_pill(lvl, counts.get(lvl, 0), total)
+            for lvl in ["low", "medium", "high"]
+            if counts.get(lvl, 0) > 0
+        ]
+        rows.append(html.Div(
+            style={"marginBottom": "6px"},
+            children=[
+                html.Span(
+                    INDICATOR_LABELS[ind],
+                    style={
+                        "fontSize": "11px",
+                        "color": "#555",
+                        "display": "block",
+                        "marginBottom": "3px",
+                    }
+                ),
+                html.Div(pills),
+            ]
+        ))
+
+    return html.Div(
+        id="cooccurrence-overlay",
+        style={
+            "position": "absolute",
+            "top": "12px",
+            "left": "12px",
+            "zIndex": 999,
+            "backgroundColor": "rgba(255,255,255,0.92)",
+            "borderRadius": "8px",
+            "padding": "10px 14px",
+            "boxShadow": "0 1px 6px rgba(0,0,0,0.15)",
+            "minWidth": "190px",
+            "pointerEvents": "none",  # don't block map interactions
+        },
+        children=[
+            html.Div(
+                style={
+                    "fontSize": "11px",
+                    "fontWeight": "700",
+                    "color": "#333",
+                    "marginBottom": "8px",
+                    "borderBottom": "1px solid #eee",
+                    "paddingBottom": "6px",
+                },
+                children=[
+                    html.Span("Indicator co-occurrence for"),
+                    html.Br(),
+                    html.Span(f"high {INDICATOR_LABELS[indicator].lower()} boroughs ({total})"),
+                ]
+            ),
+            *rows,
+        ]
+    )
 
 
 def build_figure(geojson, indicator: str):
@@ -60,7 +165,7 @@ def build_figure(geojson, indicator: str):
 
     fig = go.Figure()
 
-    for level, colour, label in LEVELS:
+    for level, colour, label in MAP_INDICATOR_COLORS:
         boroughs = buckets[level]
         fig.add_trace(
             go.Choroplethmapbox(
@@ -104,12 +209,14 @@ def render(indicator: str = "transportation_indicator"):
     fig = build_figure(geojson, indicator)
 
     return html.Div(
-        style={"height": "100%"},
+        # position: relative so the overlay can anchor absolutely inside it
+        style={"height": "100%", "position": "relative"},
         children=[
+            build_cooccurrence_overlay(indicator),
             dcc.Graph(
                 id="choropleth-map",
                 figure=fig,
                 style={"height": "100%"},
-            )
-        ],
+            ),
+        ]
     )
