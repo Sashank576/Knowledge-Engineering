@@ -1,55 +1,115 @@
 from dash import html, dcc
-import plotly.express as px
-import pandas as pd
-import random
+import plotly.graph_objects as go
 import json
 
-def render():
+# Data lives here — swap for a real source if needed
+BOROUGH_DATA = {
+    "City of London":        {"transportation_indicator": "low",    "airbnb_pressure_indicator": "low",    "housing_indicator": "high"},
+    "Barking and Dagenham":  {"transportation_indicator": "medium", "airbnb_pressure_indicator": "high",   "housing_indicator": "medium"},
+    "Barnet":                {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "high"},
+    "Bexley":                {"transportation_indicator": "low",    "airbnb_pressure_indicator": "low",    "housing_indicator": "medium"},
+    "Brent":                 {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Bromley":               {"transportation_indicator": "medium", "airbnb_pressure_indicator": "low",    "housing_indicator": "medium"},
+    "Camden":                {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Croydon":               {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "high"},
+    "Ealing":                {"transportation_indicator": "high",   "airbnb_pressure_indicator": "medium", "housing_indicator": "medium"},
+    "Enfield":               {"transportation_indicator": "low",    "airbnb_pressure_indicator": "medium", "housing_indicator": "medium"},
+    "Greenwich":             {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "medium"},
+    "Hackney":               {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Hammersmith and Fulham":{"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Haringey":              {"transportation_indicator": "medium", "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Harrow":                {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "medium"},
+    "Havering":              {"transportation_indicator": "low",    "airbnb_pressure_indicator": "low",    "housing_indicator": "low"},
+    "Hillingdon":            {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "medium"},
+    "Hounslow":              {"transportation_indicator": "high",   "airbnb_pressure_indicator": "medium", "housing_indicator": "medium"},
+    "Islington":             {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Kensington and Chelsea":{"transportation_indicator": "high",   "airbnb_pressure_indicator": "medium", "housing_indicator": "high"},
+    "Kingston upon Thames":  {"transportation_indicator": "medium", "airbnb_pressure_indicator": "low",    "housing_indicator": "medium"},
+    "Lambeth":               {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Lewisham":              {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "high"},
+    "Merton":                {"transportation_indicator": "medium", "airbnb_pressure_indicator": "low",    "housing_indicator": "medium"},
+    "Newham":                {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Redbridge":             {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "medium"},
+    "Richmond upon Thames":  {"transportation_indicator": "medium", "airbnb_pressure_indicator": "low",    "housing_indicator": "medium"},
+    "Southwark":             {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Sutton":                {"transportation_indicator": "low",    "airbnb_pressure_indicator": "low",    "housing_indicator": "low"},
+    "Tower Hamlets":         {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+    "Waltham Forest":        {"transportation_indicator": "medium", "airbnb_pressure_indicator": "medium", "housing_indicator": "high"},
+    "Wandsworth":            {"transportation_indicator": "high",   "airbnb_pressure_indicator": "medium", "housing_indicator": "high"},
+    "Westminster":           {"transportation_indicator": "high",   "airbnb_pressure_indicator": "high",   "housing_indicator": "high"},
+}
+
+# One trace per level — order here = legend order, guaranteed
+LEVELS = [
+    ("low",    "#4caf50", "Low"),
+    ("medium", "#ffeb3b", "Medium"),
+    ("high",   "#f44336", "High"),
+]
+
+
+def build_figure(geojson, indicator: str):
+    # Bucket boroughs by level
+    buckets = {"low": [], "medium": [], "high": []}
+    for feature in geojson["features"]:
+        name = feature["properties"]["name"]
+        row = BOROUGH_DATA.get(name)
+        if row is None:
+            continue
+        level = row.get(indicator, "low")
+        buckets[level].append(name)
+
+    fig = go.Figure()
+
+    for level, colour, label in LEVELS:
+        boroughs = buckets[level]
+        fig.add_trace(
+            go.Choroplethmapbox(
+                name=label,
+                geojson=geojson,
+                locations=boroughs,
+                featureidkey="properties.name",
+                # z must be supplied; use a constant so the colorscale is irrelevant
+                z=[0] * len(boroughs),
+                colorscale=[[0, colour], [1, colour]],
+                showscale=False,
+                marker_opacity=1,            # opacity of the boroughs
+                marker_line_width=1,         # thickness of the line between the boroughs
+                marker_line_color="#000000", # color of the line between the boroughs
+                hovertemplate="<b>%{location}</b><br>"
+                              + indicator.replace("_", " ").title()
+                              + f": {label}<extra></extra>",
+                showlegend=True,
+            )
+        )
+
+    fig.update_layout(
+        mapbox_style="white-bg",
+        mapbox_zoom=9,
+        mapbox_center={"lat": 51.5074, "lon": -0.1278},
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        legend=dict(
+            title=dict(text="Indicator"),
+            bgcolor="rgba(255,255,255,0.8)",
+            y=0.95 #shift legend a bit down cuz overlaps with plotly functionalities
+        ),
+    )
+
+    return fig
+
+
+def render(indicator: str = "transportation_indicator"):
     with open("assets/london_boroughs.geojson") as f:
         geojson = json.load(f)
 
-    # extract borough names for dummy data
-    boroughs = [f["properties"]["name"] for f in geojson["features"]]
-
-
-    df = pd.DataFrame({
-        "borough": boroughs,
-        "value": [random.randint(1, 100) for _ in boroughs]
-    })
-
-    # if we want google maps style
-    # fig = px.choropleth_map(
-    #     df,
-    #     geojson=geojson,
-    #     locations="borough",
-    #     featureidkey="properties.name",
-    #     color="value",
-    #     map_style="carto-positron",
-    #     zoom=9,
-    #     center={"lat": 51.5074, "lon": -0.1278},
-    #     color_continuous_scale="Blues",
-    # )
-    # fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-
-    fig = px.choropleth_map(
-        df,
-        geojson=geojson,
-        locations="borough",
-        featureidkey="properties.name",
-        color="value",
-        map_style="white-bg",
-        color_continuous_scale="Blues",
-        zoom=8,
-        center={"lat": 51.5074, "lon": -0.1278},
-    )
-    fig.update_layout(
-        margin={"r": 0, "t": 0, "l": 0, "b": 0},
-
-    )
+    fig = build_figure(geojson, indicator)
 
     return html.Div(
-        style={'height': '100%'},
+        style={"height": "100%"},
         children=[
-            dcc.Graph(figure=fig, style={'height': '100%'})
-        ]
+            dcc.Graph(
+                id="choropleth-map",
+                figure=fig,
+                style={"height": "100%"},
+            )
+        ],
     )
