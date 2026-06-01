@@ -271,11 +271,16 @@ def build_figure(geojson, indicator: str, airbnb_listings: list[dict] | None = N
         mapbox_style="white-bg",
         mapbox_zoom=zoom,
         mapbox_center=center if center else {"lat": 51.5074, "lon": -0.1278},
+        # Force the layout to ignore all margins
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        # Ensure the plot fills the available space
+        autosize=True,
+        # This prevents the legend from forcing a margin on the right side
         legend=dict(
             title=dict(text="Indicator"),
             bgcolor="rgba(255,255,255,0.8)",
-            y=0.95 #shift legend a bit down cuz overlaps with plotly functionalities
+            x=0.82,  # Move it to the left so it doesn't push the right boundary
+            y=0.95
         ),
     )
 
