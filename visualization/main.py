@@ -1,5 +1,5 @@
 from dash import Dash, html, Input, Output, callback
-from components import map_column, filters_column
+from components import map_column, filters_column, details_column
 import json
 
 app = Dash()
@@ -58,7 +58,7 @@ app.layout = html.Div(
     children=[
         filters_column.render(),
         map_column.render(),
-        html.Div("Details (30%)"),
+        details_column.render(),
     ],
 )
 
