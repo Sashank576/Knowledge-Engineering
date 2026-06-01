@@ -5,7 +5,7 @@ import json
 app = Dash()
 
 # Load listings once at startup — swap with your real data source.
-# Each listing needs "lat", "lon", "name", and "borough" (must match BOROUGH_DATA keys).
+# Each listing needs "lat", "lon", "name", "borough", and one key per indicator.
 AIRBNB_LISTINGS = [
     {"lat": 51.5155, "lon": -0.0922, "name": "Cosy flat",          "borough": "Hackney"},
     {"lat": 51.5190, "lon": -0.0880, "name": "Victorian terrace",  "borough": "Hackney"},
@@ -37,7 +37,7 @@ AIRBNB_LISTINGS = [
     {"lat": 51.5080, "lon": -0.0560, "name": "Whitechapel flat",   "borough": "Tower Hamlets"},
     {"lat": 51.5060, "lon": -0.0490, "name": "Stepney studio",     "borough": "Tower Hamlets"},
     {"lat": 51.4990, "lon": -0.2100, "name": "Hammersmith flat",   "borough": "Hammersmith and Fulham"},
-    {"lat": 51.5130, "lon": -0.2200, "name": "Shepherd's Bush",   "borough": "Hammersmith and Fulham"},
+    {"lat": 51.5130, "lon": -0.2200, "name": "Shepherd's Bush",    "borough": "Hammersmith and Fulham"},
     {"lat": 51.4760, "lon": -0.1550, "name": "Balham room",        "borough": "Wandsworth"},
     {"lat": 51.4630, "lon": -0.1400, "name": "Tooting double",     "borough": "Wandsworth"},
     {"lat": 51.4700, "lon": -0.1700, "name": "Streatham flat",     "borough": "Lambeth"},
@@ -57,30 +57,50 @@ app.layout = html.Div(
     },
     children=[
         filters_column.render(),
-        map_column.render(),           # renders with default indicator on load
+        map_column.render(),
         html.Div("Details (30%)"),
     ],
 )
 
 
+def filter_listings(listings, transport_levels, pressure_levels, housing_levels):
+    """
+    Keep listings whose borough's indicators match all enabled levels.
+    Indicator values are looked up from map_column.BOROUGH_DATA, not stored
+    on the listing itself.
+    """
+    borough_data = map_column.BOROUGH_DATA
+    return [
+        l for l in listings
+        if (row := borough_data.get(l["borough"])) is not None
+        and row["transportation_indicator"]  in (transport_levels or [])
+        and row["airbnb_pressure_indicator"] in (pressure_levels  or [])
+        and row["housing_indicator"]         in (housing_levels   or [])
+    ]
+
+
 @callback(
     Output("choropleth-map", "figure"),
     Output("cooccurrence-overlay", "children"),
-    Input("indicator-dropdown", "value"),
-    Input("choropleth-map", "relayoutData"),  # fired on every pan / zoom
+    Input("indicator-dropdown",               "value"),
+    Input("choropleth-map",                   "relayoutData"),
+    Input("filter-transportation_indicator",  "value"),
+    Input("filter-airbnb_pressure_indicator", "value"),
+    Input("filter-housing_indicator",         "value"),
 )
-def update_map(indicator, relayout_data):
+def update_map(indicator, relayout_data, transport_levels, pressure_levels, housing_levels):
     # Preserve whatever zoom/center the user has scrolled to
-    zoom = 9
+    zoom   = 9
     center = None
-
     if relayout_data:
         if "mapbox.zoom" in relayout_data:
             zoom = relayout_data["mapbox.zoom"]
         if "mapbox.center" in relayout_data:
             center = relayout_data["mapbox.center"]
 
-    fig = map_column.build_figure(GEOJSON, indicator, AIRBNB_LISTINGS, zoom=zoom, center=center)
+    visible = filter_listings(AIRBNB_LISTINGS, transport_levels, pressure_levels, housing_levels)
+
+    fig = map_column.build_figure(GEOJSON, indicator, visible, zoom=zoom, center=center)
     overlay_children = map_column.build_cooccurrence_overlay(indicator).children
     return fig, overlay_children
 
