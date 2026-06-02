@@ -41,6 +41,12 @@ def _score_chip(title, score, level, rank):
         ],
     )
 
+def _get_similar_boroughs(borough):
+    if borough == "Redbridge":
+        return ["Barnet", "Harrow", "Hillingdon"]
+
+    return ["Camden", "Islington", "Hackney"]
+
 def render_selected_borough(borough=None):
     if borough is None:
         return html.Div(
@@ -107,6 +113,21 @@ def render_selected_borough(borough=None):
                         data["housing_rank"],
                     ),
                 ],
+            ),
+            html.Div(
+                style={
+                    "marginTop": "8px",
+                    "marginBottom": "12px",
+                    "fontSize": "13px",
+                    "color": "#4b5563",
+                },
+                children=[
+                    html.Span(
+                        "Most similar boroughs: ",
+                        style={"fontWeight": "600"},
+                    ),
+                    ", ".join(_get_similar_boroughs(borough))
+                ]
             ),
             html.Div(
                 style={
