@@ -1,5 +1,5 @@
 from dash import Dash, html, Input, Output, callback
-from components import map_column, filters_column, details_column
+from components import map_column, filters_column, details_column, borough_details_panel
 import json
 
 app = Dash()
@@ -51,17 +51,29 @@ with open("assets/london_boroughs.geojson") as f:
 app.layout = html.Div(
     style={
         "display": "grid",
-        "gridTemplateColumns": "20% 50% 30%",
+        "gridTemplateColumns": "18% 57% 25%",
         "height": "100vh",
         "boxSizing": "border-box",
     },
     children=[
         filters_column.render(),
-        map_column.render(),
+
+        html.Div(
+            style={
+                "display": "grid",
+                "gridTemplateRows": "72% 28%",
+                "height": "100vh",
+                "minHeight": 0,
+            },
+            children=[
+                map_column.render(),
+                borough_details_panel.render(),
+            ],
+        ),
+
         details_column.render(),
     ],
 )
-
 
 def filter_listings(listings, transport_levels, pressure_levels, housing_levels):
     """
@@ -104,6 +116,21 @@ def update_map(indicator, relayout_data, transport_levels, pressure_levels, hous
     overlay_children = map_column.build_cooccurrence_overlay(indicator).children
     return fig, overlay_children
 
+
+@callback(
+    Output("borough-details-panel", "children"),
+    Input("choropleth-map", "clickData"),
+)
+def update_borough_details(clickData):
+    if not clickData:
+        return borough_details_panel.render_borough_details()
+
+    borough = clickData["points"][0].get("location")
+
+    if not borough:
+        return borough_details_panel.render_borough_details()
+
+    return borough_details_panel.render_borough_details(borough)
 
 if __name__ == "__main__":
     app.run(debug=True)
