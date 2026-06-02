@@ -24,6 +24,10 @@ demographics_df = df[
         "Rented from Local Authority or Housing Association, (2014) %",
         "Rented from Private landlord, (2014) %",
         "Average Public Transport Accessibility score, 2014",
+        "Net internal migration (2014)",
+        "Net international migration (2014)",
+        "% of adults who cycle at least once per month, 2013/14",
+        "Number of cars per household, (2011 Census)"
     ]
 ]
 
@@ -40,8 +44,15 @@ demographics_df = demographics_df.rename(columns={
     "Being bought with mortgage or loan, (2014) %": "ownedRatio2",
     "Rented from Local Authority or Housing Association, (2014) %": "rentedAssociationRatio",
     "Rented from Private landlord, (2014) %": "rentedPrivateRatio",
-    "Average Public Transport Accessibility score, 2014": "transportScore"
+    "Average Public Transport Accessibility score, 2014": "transportScore",
+    "Net internal migration (2014)": "netInternalMigration",
+    "Net international migration (2014)": "netInternationalMigration",
+    "% of adults who cycle at least once per month, 2013/14": "cyclePerMonth",
+    "Number of cars per household, (2011 Census)": "carsPerHousehold"
 })
+
+# Remove rows with missing borough names or household estimates
+demographics_df = demographics_df.dropna(subset=["borough", "householdEstimate"])
 
 # Ratio of non-rented homes
 demographics_df["ownedRatio"] = (
@@ -71,11 +82,40 @@ numeric_cols = [
     "ownedRatio",
     "rentedAssociationRatio",
     "rentedPrivateRatio",
-    "transportScore"
+    "transportScore",
+    "netInternalMigration",
+    "netInternationalMigration",
+    "cyclePerMonth",
+    "carsPerHousehold"
 ]
 
 for col in numeric_cols:
     demographics_df[col] = clean_numeric(demographics_df[col])
+
+# Impute missing value for the percentage of privately rented homes for the City of London using the median
+rent_share_median = demographics_df["rentedPrivateRatio"].median()
+demographics_df.loc[
+    demographics_df["borough"] == "City of London",
+    "rentedPrivateRatio"
+] = rent_share_median
+
+# Impute missing value for the percentage of cycling adults for the City of London using the median
+demographics_df.loc[
+    demographics_df["borough"] == "City of London",
+    "cyclePerMonth"
+] = demographics_df["cyclePerMonth"].median()
+
+# Net migration
+# positive migration → more housing demand
+# negative migration → less housing demand
+demographics_df["netMigration"] = (
+    demographics_df["netInternalMigration"]
+    +
+    demographics_df["netInternationalMigration"]
+)
+demographics_df = demographics_df.drop(
+    columns=["netInternalMigration", "netInternationalMigration"]
+)
 
 # ---------------------------------------------------
 # Prepare the original Airbnb dataset
@@ -92,6 +132,8 @@ airbnb_df = df[
         "id",
         "host_id",
         "neighbourhood",
+        "latitude",
+        "longitude",
         "room_type",
         "price",
         "minimum_nights",

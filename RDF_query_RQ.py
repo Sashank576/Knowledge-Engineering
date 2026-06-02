@@ -87,8 +87,6 @@ for level, borough_count, avg_score, avg_income, avg_house_price, avg_pop_densit
 # Research Question 2
 # Query 1: Examples of entire-home Airbnb listings in high Airbnb and housing pressure boroughs.
 # Direct answer to RQ2 (with limit so that we don't print all thousands of them)
-# NOTE: For the visualization, we wanted something like dots on the map, so we still need to include
-# longitude and latitude in the RDF (I can do this later).
 rq2_query1 = """
 PREFIX ex: <http://example.org/london-airbnb/>
 
@@ -97,10 +95,14 @@ SELECT
     ?borough
     ?airbnbScore
     ?housingScore
+    ?latitude
+    ?longitude
 WHERE {
     ?listing ex:isLocatedIn ?borough ;
-             ex:hasRoomType ?roomType .
-             
+             ex:hasRoomType ?roomType ;
+             ex:latitude ?latitude ;
+             ex:longitude ?longitude .
+
     ?roomType ex:roomTypeName ?roomName .
     FILTER(str(?roomName) = "Entire home/apt")
 
@@ -120,11 +122,13 @@ LIMIT 5
 results = graph.query(rq2_query1)
 
 print("RQ2: Entire-home listings in high pressure boroughs")
-for listing, borough, airbnb_score, housing_score in results:
+for listing, borough, airbnb_score, housing_score, latitude, longitude in results:
     print(f"Listing ID: {shorten_uri(listing)}")
     print(f"  Borough        : {shorten_uri(borough)}")
     print(f"  Airbnb score   : {float(airbnb_score):.3f}")
     print(f"  Housing score  : {float(housing_score):.3f}")
+    print(f"  Latitude  : {float(latitude):.3f}")
+    print(f"  Longitude  : {float(longitude):.3f}")
     print()
 
 # Query 2: Count the number of such listings per high pressure borough
@@ -144,10 +148,9 @@ WHERE {
 
     ?borough ex:hasPressureIndicator ?pressure ;
              ex:hasHousingIndicator ?housing .
-        
+        FILTER(str(?airbnbLevel) = "High")
 
     ?pressure ex:airbnbPressureLevel ?airbnbLevel .
-    FILTER(str(?airbnbLevel) = "High")
     ?housing ex:housingPressureLevel ?housingLevel .
     FILTER(str(?housingLevel) = "High")
 }
@@ -206,42 +209,56 @@ for host_id, borough_count, borough_list in results:
 # NOTE: Might be better to add the transport bands directly into the graphs.
 rq4_query1 = """
 PREFIX ex: <http://example.org/london-airbnb/>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT
     ?pressureLevel
     ?housingLevel
-    ?transportBand
+    ?transportLevel
     (COUNT(?borough) AS ?boroughCount)
     # List of the individual borough names
     (GROUP_CONCAT(DISTINCT STRAFTER(STR(?borough), "/borough/"); separator=", ") AS ?boroughs)
 WHERE {
     ?borough ex:hasPressureIndicator ?pressure ;
              ex:hasHousingIndicator ?housing ;
-             ex:transportAccessibility ?transport .
+             ex:hasTransportIndicator ?transport .
 
     ?pressure ex:airbnbPressureLevel ?pressureLevel .
     ?housing ex:housingPressureLevel ?housingLevel .
-
-    # Transport accessibility bands (might want to put this into the RDF graph before querying)
-    BIND(xsd:float(?transport) AS ?transportNum)
-    BIND(
-        IF(?transportNum < 4, "Low",
-        IF(?transportNum <= 6, "Medium", "High"))
-        AS ?transportBand
-    )
+    ?transport ex:transportAccessibilityLevel ?transportLevel .
 }
 
-GROUP BY ?pressureLevel ?housingLevel ?transportBand
+GROUP BY ?pressureLevel ?housingLevel ?transportLevel
 ORDER BY DESC(?boroughCount)
 """
 results = graph.query(rq4_query1)
 
-print("\nRQ4: Borough Pressure Profile Clusters")
-for pressureLevel, housingLevel, transportBand, borough_count, boroughs in results:
-    print("\nProfile:")
+print("RQ4: Borough Pressure Profile Clusters")
+for pressureLevel, housingLevel, transportLevel, borough_count, boroughs in results:
+    print("Profile:")
     print(f"  Pressure Level  : {pressureLevel}")
     print(f"  Housing Level   : {housingLevel}")
-    print(f"  Transport Band  : {transportBand}")
+    print(f"  Transport Level : {transportLevel}")
     print(f"  Borough Count   : {int(borough_count)}")
     print(f"  Boroughs        : {boroughs}")
+    print()
+
+# Query 2: Borough profile similarity
+rq4_query2 = """
+PREFIX ex: <http://example.org/london-airbnb/>
+
+SELECT ?from_borough ?to_borough ?similarity
+WHERE {
+    ?profile    ex:hasSource ?from_borough ;
+                ex:hasTarget ?to_borough ;
+                 ex:similarityValue ?similarity .
+
+    FILTER(?similarity > 0.8)
+}
+ORDER BY DESC(?similarity)
+LIMIT 10
+"""
+results = graph.query(rq4_query2)
+
+print("RQ4: Borough profile similarity pairs (similarity value > 0.8)")
+for from_borough, to_borough, similarity in results:
+    print(f"{shorten_uri(from_borough)} - {shorten_uri(to_borough)} : {float(similarity):.3f}")
