@@ -1,5 +1,5 @@
 from dash import Dash, html, Input, Output, callback
-from components import map_column, filters_column, details_column, borough_details_panel
+from components import map_column, filters_column, details_column, selected_borough_panel
 import json
 
 app = Dash()
@@ -51,30 +51,27 @@ with open("assets/london_boroughs.geojson") as f:
 app.layout = html.Div(
     style={
         "display": "grid",
-        "gridTemplateColumns": "18% 57% 25%",
+        "gridTemplateRows": "68% 32%",
         "height": "100vh",
         "boxSizing": "border-box",
     },
     children=[
-        filters_column.render(),
-
         html.Div(
             style={
                 "display": "grid",
-                "gridTemplateRows": "72% 28%",
-                "height": "100vh",
+                "gridTemplateColumns": "18% 57% 25%",
                 "minHeight": 0,
             },
             children=[
+                filters_column.render(),
                 map_column.render(),
-                borough_details_panel.render(),
+                details_column.render(),
             ],
         ),
 
-        details_column.render(),
+        selected_borough_panel.render(),
     ],
 )
-
 def filter_listings(listings, transport_levels, pressure_levels, housing_levels):
     """
     Keep listings whose borough's indicators match all enabled levels.
@@ -118,19 +115,19 @@ def update_map(indicator, relayout_data, transport_levels, pressure_levels, hous
 
 
 @callback(
-    Output("borough-details-panel", "children"),
+    Output("selected-borough-panel", "children"),
     Input("choropleth-map", "clickData"),
 )
-def update_borough_details(clickData):
+def update_selected_borough_panel(clickData):
     if not clickData:
-        return borough_details_panel.render_borough_details()
+        return selected_borough_panel.render_selected_borough()
 
     borough = clickData["points"][0].get("location")
 
     if not borough:
-        return borough_details_panel.render_borough_details()
+        return selected_borough_panel.render_selected_borough()
 
-    return borough_details_panel.render_borough_details(borough)
+    return selected_borough_panel.render_selected_borough(borough)
 
 if __name__ == "__main__":
     app.run(debug=True)
