@@ -52,7 +52,7 @@ def render_selected_borough(borough=None):
         return html.Div(
             style={"padding": "20px 24px", "color": "#6b7280"},
             children=[
-                html.H3("Selected Borough Intelligence", style={"marginTop": 0}),
+                html.H3("Selected Borough Details", style={"marginTop": 0}),
                 html.P("Click a borough on the map to view scores  and related listings/hosts."),
             ],
         )
