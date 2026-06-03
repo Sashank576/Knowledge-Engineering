@@ -1,6 +1,10 @@
 from dash import Dash, html, Input, Output, callback
 from components import map_column, filters_column, details_column, selected_borough_panel
 import json
+from rdflib import Graph
+import time
+
+start = time.time()
 
 app = Dash()
 
@@ -45,8 +49,19 @@ AIRBNB_LISTINGS = [
     {"lat": 51.5500, "lon": -0.0900, "name": "Finsbury Park room", "borough": "Islington"},
 ]
 
+# Load RDF graph
+knowledge_graph = Graph()
+knowledge_graph.parse("assets/london_airbnb_kg.ttl", format="turtle")
+
+print("Triples loaded:", len(knowledge_graph))
+
 with open("assets/london_boroughs.geojson") as f:
     GEOJSON = json.load(f)
+
+
+end = time.time()
+length = end - start
+print("It took", length, "seconds to start the app!")
 
 app.layout = html.Div(
     style={
@@ -64,7 +79,7 @@ app.layout = html.Div(
             },
             children=[
                 filters_column.render(),
-                map_column.render(),
+                map_column.render(knowledge_graph),
                 details_column.render(),
             ],
         ),
@@ -109,7 +124,7 @@ def update_map(indicator, relayout_data, transport_levels, pressure_levels, hous
 
     visible = filter_listings(AIRBNB_LISTINGS, transport_levels, pressure_levels, housing_levels)
 
-    fig = map_column.build_figure(GEOJSON, indicator, visible, zoom=zoom, center=center)
+    fig = map_column.build_figure(knowledge_graph, GEOJSON, indicator, visible, zoom=zoom, center=center)
     overlay_children = map_column.build_cooccurrence_overlay(indicator).children
     return fig, overlay_children
 

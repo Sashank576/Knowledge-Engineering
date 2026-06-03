@@ -3,6 +3,10 @@ import plotly.graph_objects as go
 import json
 from collections import Counter, defaultdict
 import random
+from rdflib import Graph
+from utilities.queries import GET_ALL_BOROUGHS
+from utilities.knowledge_graph import query_to_dataframe
+
 
 random.seed(42)
 
@@ -220,19 +224,24 @@ def cluster_listings(listings: list[dict], zoom: float) -> list[dict]:
 
     return points
 
-def build_figure(geojson, indicator: str, airbnb_listings: list[dict] | None = None, zoom: float = 9, center: dict | None = None):
+def build_figure(knowledge_graph: Graph, geojson, indicator: str, airbnb_listings: list[dict] | None = None, zoom: float = 9, center: dict | None = None):
     """
     airbnb_listings: list of dicts with keys "lat", "lon", and optionally "name"
     e.g. [{"lat": 51.51, "lon": -0.12, "name": "Cosy flat in Hackney"}, ...]
     """
+
+    all_boroughs = query_to_dataframe(knowledge_graph, GET_ALL_BOROUGHS, ["name"])
+    # make a list of the name of the borough the key
+    all_boroughs = all_boroughs.set_index('name').to_dict('index')
+
     # Bucket boroughs by level
     buckets = {"low": [], "medium": [], "high": []}
     for feature in geojson["features"]:
         name = feature["properties"]["name"]
-        row = BOROUGH_DATA.get(name)
+        row = all_boroughs.get(name)
         if row is None:
             continue
-        level = row.get(indicator, "low")
+        level = row.get(indicator, "low").lower()
         buckets[level].append(name)
 
     fig = go.Figure()
@@ -312,11 +321,11 @@ def build_figure(geojson, indicator: str, airbnb_listings: list[dict] | None = N
     return fig
 
 
-def render(indicator: str = "transportation_indicator"):
+def render(knowledge_graph, indicator: str = "transportation_indicator"):
     with open("assets/london_boroughs.geojson") as f:
         geojson = json.load(f)
 
-    fig = build_figure(geojson, indicator)
+    fig = build_figure(knowledge_graph, geojson, indicator)
 
     return html.Div(
         # position: relative so the overlay can anchor absolutely inside it
