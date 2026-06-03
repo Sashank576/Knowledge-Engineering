@@ -1,6 +1,6 @@
 venv/
 visualization/venv/
-./idea
+.idea/
 visualization/.idea/
 .ipynb_checkpoints/
 __pycache__/
