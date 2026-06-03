@@ -1,9 +1,12 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="$SCRIPT_DIR/venv"
-REQUIREMENTS="$SCRIPT_DIR/requirements.txt"
+SRC_DIR="$SCRIPT_DIR/visualization"
+VENV_DIR="$SRC_DIR/venv"
+REQUIREMENTS="$SRC_DIR/requirements.txt"
+
+cd "$SRC_DIR"
 
 # Create venv if it doesn't exist
 if [ ! -d "$VENV_DIR" ]; then
@@ -16,7 +19,8 @@ source "$VENV_DIR/bin/activate"
 
 # Install dependencies
 echo "Installing dependencies..."
-pip install --quiet -r "$REQUIREMENTS"
+python -m pip install --upgrade pip --quiet
+python -m pip install --quiet -r "$REQUIREMENTS"
 
 # Run
 echo "Starting app..."
