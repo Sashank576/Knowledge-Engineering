@@ -148,9 +148,9 @@ WHERE {
 
     ?borough ex:hasPressureIndicator ?pressure ;
              ex:hasHousingIndicator ?housing .
-        FILTER(str(?airbnbLevel) = "High")
 
     ?pressure ex:airbnbPressureLevel ?airbnbLevel .
+    FILTER(str(?airbnbLevel) = "High")
     ?housing ex:housingPressureLevel ?housingLevel .
     FILTER(str(?housingLevel) = "High")
 }
