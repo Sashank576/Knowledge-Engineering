@@ -1,0 +1,139 @@
+from_borough,to_borough,similarity
+Enfield,Sutton,0.9975194701250748
+Bexley,Enfield,0.9960122398159824
+Hammersmith and Fulham,Wandsworth,0.9959879095170224
+Enfield,Redbridge,0.9959836037484264
+Greenwich,Kingston upon Thames,0.9959596642330204
+Greenwich,Sutton,0.9959526385048062
+Hackney,Southwark,0.9955984044706012
+Bromley,Havering,0.9953018171125204
+Croydon,Redbridge,0.9943736799237624
+Croydon,Enfield,0.9928118018381876
+Camden,Westminster,0.9921949426391372
+Islington,Southwark,0.991821109979812
+Bexley,Sutton,0.9914958354929186
+Redbridge,Sutton,0.991365517814852
+Enfield,Greenwich,0.9909542591102208
+Bexley,Greenwich,0.9908738695996598
+Barking and Dagenham,Sutton,0.9907303342505684
+Bexley,Croydon,0.9902917134856092
+Kensington and Chelsea,Westminster,0.9900136135377056
+Hammersmith and Fulham,Tower Hamlets,0.9897953669130845
+Croydon,Hounslow,0.9888977594054672
+Barking and Dagenham,Kingston upon Thames,0.9886755128638924
+Croydon,Hillingdon,0.9885208904274316
+Barking and Dagenham,Greenwich,0.9883844824012672
+Harrow,Hillingdon,0.9880051486604386
+Kingston upon Thames,Sutton,0.9863199198809508
+Havering,Hounslow,0.986070568095128
+Bexley,Redbridge,0.9857981016205164
+Hillingdon,Hounslow,0.9851316057292222
+Tower Hamlets,Wandsworth,0.984902193957432
+Southwark,Wandsworth,0.9840448308627652
+Croydon,Sutton,0.9820866286782766
+Camden,Kensington and Chelsea,0.9810400172090276
+Bexley,Hounslow,0.9809478229300028
+Tower Hamlets,Westminster,0.9802309038890636
+Hackney,Wandsworth,0.9799768169720336
+Hackney,Lambeth,0.9795610551108096
+Islington,Tower Hamlets,0.9793071162273445
+Barking and Dagenham,Enfield,0.9790681770078928
+Greenwich,Redbridge,0.976806775237368
+Camden,Tower Hamlets,0.9766450274871192
+Hackney,Islington,0.9765986453296812
+Bexley,Kingston upon Thames,0.9756110787621314
+Southwark,Tower Hamlets,0.9755680797372842
+Enfield,Kingston upon Thames,0.9754405989616244
+Hillingdon,Redbridge,0.9753153799541716
+Bexley,Havering,0.973312050498146
+Bexley,Bromley,0.972173515753465
+Barking and Dagenham,Redbridge,0.9721264139043432
+Enfield,Hounslow,0.9716115277322164
+Hammersmith and Fulham,Westminster,0.9701062212570788
+Bromley,Hounslow,0.96958732995469
+Croydon,Greenwich,0.9694705487445432
+Hammersmith and Fulham,Southwark,0.9691917239426068
+Hounslow,Redbridge,0.967777636501596
+Barking and Dagenham,Bexley,0.9662421125930322
+Islington,Wandsworth,0.9661376495226224
+Enfield,Hillingdon,0.963961940863028
+Croydon,Havering,0.9610363583970803
+Bexley,Hillingdon,0.9597879036597856
+Hackney,Hammersmith and Fulham,0.9591671092736028
+Lambeth,Southwark,0.9572331776798626
+Brent,Newham,0.9568089744734986
+Kingston upon Thames,Redbridge,0.956227327308617
+Hackney,Tower Hamlets,0.9556106791694204
+Hammersmith and Fulham,Islington,0.9556006022568314
+Kingston upon Thames,Merton,0.9550250260174687
+Croydon,Harrow,0.95489462823683
+Hounslow,Sutton,0.9535264547133668
+Lambeth,Wandsworth,0.9532920162222632
+Bromley,Greenwich,0.9515507285273284
+Harrow,Hounslow,0.9511705218815252
+Enfield,Havering,0.951085427160302
+Barking and Dagenham,Croydon,0.9493940982573188
+Camden,Hammersmith and Fulham,0.9490445204220496
+Wandsworth,Westminster,0.9476455034717438
+Bromley,Enfield,0.9474128817846116
+Bromley,Croydon,0.9468570216715184
+Greenwich,Hounslow,0.9458165399360932
+Hillingdon,Sutton,0.9439519445919876
+Croydon,Kingston upon Thames,0.943604808245778
+Havering,Hillingdon,0.9428356006763832
+Kensington and Chelsea,Tower Hamlets,0.9426742527620684
+Greenwich,Havering,0.9421979944232476
+Harrow,Redbridge,0.93993321417037
+Bromley,Sutton,0.9371134285341156
+Camden,Islington,0.937074341902481
+Bromley,Kingston upon Thames,0.9367133448238856
+Havering,Sutton,0.9352578726476092
+Havering,Redbridge,0.9326861325257884
+Hammersmith and Fulham,Kensington and Chelsea,0.9309530388087628
+Camden,Wandsworth,0.9278671732488346
+Greenwich,Merton,0.9276911156882588
+Islington,Westminster,0.924804199598452
+Hammersmith and Fulham,Lambeth,0.9244683855246998
+Bromley,Redbridge,0.9218481197617554
+Greenwich,Hillingdon,0.9213001800684468
+Havering,Kingston upon Thames,0.9190418982824952
+Barnet,Harrow,0.9175355752004888
+Enfield,Harrow,0.9160716427984902
+Hounslow,Kingston upon Thames,0.9147243085262384
+Bromley,Hillingdon,0.9145426659884004
+Islington,Lambeth,0.9134251680624828
+Barking and Dagenham,Merton,0.913232889691507
+Southwark,Westminster,0.9130772607122672
+Camden,Southwark,0.9113405842686182
+Bexley,Harrow,0.905496388808154
+Barking and Dagenham,Hounslow,0.9037574560156516
+Barking and Dagenham,Hillingdon,0.8969974921940057
+Kensington and Chelsea,Wandsworth,0.8964982223273379
+Lambeth,Tower Hamlets,0.8949633135801217
+Barking and Dagenham,Bromley,0.8939567821797855
+Merton,Sutton,0.8932723531186476
+Harrow,Sutton,0.8893945770047493
+Harrow,Havering,0.888721580141533
+Barking and Dagenham,Havering,0.8839507661493736
+Hillingdon,Kingston upon Thames,0.8827905873941376
+Bexley,Merton,0.8827548974848511
+Hackney,Westminster,0.8813509063491324
+Bromley,Merton,0.8798572441725934
+Camden,Hackney,0.8726538644084887
+Enfield,Merton,0.8693700721344133
+Islington,Kensington and Chelsea,0.8652320915506648
+Barnet,Hillingdon,0.858820562825834
+Greenwich,Harrow,0.8544552903506427
+Merton,Richmond upon Thames,0.8476904671501821
+Bromley,Harrow,0.8467112803030297
+Kensington and Chelsea,Southwark,0.8465081804279078
+Havering,Merton,0.8354051486402357
+Barking and Dagenham,Harrow,0.8349102413072459
+Ealing,Waltham Forest,0.8290439679422053
+Merton,Redbridge,0.8270298654134693
+Barnet,Waltham Forest,0.8216692503000541
+Croydon,Merton,0.812012862861302
+Barnet,Redbridge,0.8088460185834235
+Lambeth,Westminster,0.8069417586922893
+Hackney,Kensington and Chelsea,0.8062905846575315
+Harrow,Kingston upon Thames,0.8052528634860815

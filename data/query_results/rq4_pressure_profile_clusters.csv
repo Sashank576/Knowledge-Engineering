@@ -1,0 +1,12 @@
+pressureLevel,housingLevel,transportLevel,boroughCount,boroughs
+High,High,High,9,"Hammersmith_and_Fulham, Lambeth, Southwark, Islington, Kensington_and_Chelsea, Camden, Hackney, Tower_Hamlets, Westminster"
+Low,Low,Low,8,"Havering, Bexley, Sutton, Barking_and_Dagenham, Enfield, Bromley, Redbridge, Croydon"
+Medium,Medium,Medium,6,"Hounslow, Waltham_Forest, Merton, Greenwich, Ealing, Lewisham"
+Low,Medium,Low,2,"Harrow, Hillingdon"
+Medium,High,Medium,2,"Newham, Brent"
+High,Low,High,1,City_of_London
+Low,Low,Medium,1,Kingston_upon_Thames
+Medium,Low,Medium,1,Richmond_upon_Thames
+Medium,Medium,Low,1,Barnet
+Medium,Medium,High,1,Haringey
+High,Medium,Medium,1,Wandsworth
