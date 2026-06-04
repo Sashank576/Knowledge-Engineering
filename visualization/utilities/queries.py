@@ -7,15 +7,22 @@ GET_ALL_BOROUGHS = """
         ?airbnb_pressure_indicator
         ?housing_indicator
         ?transportation_indicator
+    
+        ?airbnb_score
+        ?housing_score
+        ?transport_score
     WHERE {
         ?borough ex:hasPressureIndicator ?pressureIndicator .
-        ?pressureIndicator ex:airbnbPressureLevel ?airbnb_pressure_indicator .
+        ?pressureIndicator ex:airbnbPressureLevel ?airbnb_pressure_indicator ;
+                           ex:airbnbPressureScore ?airbnb_score .
     
         ?borough ex:hasHousingIndicator ?housingIndicator .
-        ?housingIndicator ex:housingPressureLevel ?housing_indicator .
+        ?housingIndicator ex:housingPressureLevel ?housing_indicator ;
+                          ex:housingPressureScore ?housing_score .
     
         ?borough ex:hasTransportIndicator ?transportIndicator .
-        ?transportIndicator ex:transportPressureLevel ?transportation_indicator .
+        ?transportIndicator ex:transportPressureLevel ?transportation_indicator ;
+                            ex:transportPressureScore ?transport_score .
     }
 """
 

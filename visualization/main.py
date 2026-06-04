@@ -15,6 +15,11 @@ knowledge_graph = Graph()
 knowledge_graph.parse("assets/london_airbnb_kg.ttl", format="turtle")
 
 all_boroughs = query_to_dataframe(knowledge_graph, GET_ALL_BOROUGHS, ["name"])
+# calculate the rank for each borough
+all_boroughs['transport_rank'] = all_boroughs['transport_score'].rank(method='min').astype(int)
+all_boroughs['airbnb_rank']    = all_boroughs['airbnb_score'].rank(method='min').astype(int)
+all_boroughs['housing_rank']   = all_boroughs['housing_score'].rank(method='min').astype(int)
+
 # make a dict with the name of the borough as the key
 all_boroughs = all_boroughs.set_index('name').to_dict('index')
 
@@ -49,7 +54,7 @@ app.layout = html.Div(
             ],
         ),
 
-        selected_borough_panel.render(),
+        selected_borough_panel.render(all_boroughs),
     ],
 )
 def filter_listings(listings, transport_levels, pressure_levels, housing_levels):
@@ -101,14 +106,14 @@ def update_map(indicator, relayout_data, transport_levels, pressure_levels, hous
 )
 def update_selected_borough_panel(clickData):
     if not clickData:
-        return selected_borough_panel.render_selected_borough()
+        return selected_borough_panel.render_selected_borough(all_boroughs)
 
     borough = clickData["points"][0].get("location")
 
     if not borough:
-        return selected_borough_panel.render_selected_borough()
+        return selected_borough_panel.render_selected_borough(all_boroughs)
 
-    return selected_borough_panel.render_selected_borough(borough)
+    return selected_borough_panel.render_selected_borough(all_boroughs, borough)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,12 +1,11 @@
 from dash import html
-from components.map_column import BOROUGH_DATA
 
 
 def _level_color(level):
     return {
-        "low": "#4caf50",
-        "medium": "#f5a623",
-        "high": "#f44336",
+        "Low": "#4caf50",
+        "Medium": "#f5a623",
+        "High": "#f44336",
     }.get(level, "#999")
 
 
@@ -30,7 +29,7 @@ def _score_chip(title, score, level, rank):
                 level.title(),
                 style={
                     "backgroundColor": _level_color(level),
-                    "color": "#fff" if level != "medium" else "#111",
+                    "color": "#fff" if level != "Medium" else "#111",
                     "padding": "1px 6px",
                     "borderRadius": "999px",
                     "fontSize": "10px",
@@ -47,7 +46,7 @@ def _get_similar_boroughs(borough):
 
     return ["Camden", "Islington", "Hackney"]
 
-def render_selected_borough(borough=None):
+def render_selected_borough(all_boroughs, borough=None):
     if borough is None:
         return html.Div(
             style={"padding": "20px 24px", "color": "#6b7280"},
@@ -57,7 +56,7 @@ def render_selected_borough(borough=None):
             ],
         )
 
-    data = BOROUGH_DATA.get(borough)
+    data = all_boroughs.get(borough)
 
     if data is None:
         return html.Div(
@@ -316,7 +315,7 @@ def render_selected_borough(borough=None):
     )
 
 
-def render():
+def render(all_boroughs):
     return html.Div(
         id="selected-borough-panel",
         style={
@@ -324,5 +323,5 @@ def render():
             "backgroundColor": "#f9fafb",
             "minHeight": 0,
         },
-        children=render_selected_borough(),
+        children=render_selected_borough(all_boroughs),
     )

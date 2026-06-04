@@ -2,70 +2,8 @@ from dash import html, dcc
 import plotly.graph_objects as go
 import json
 from collections import Counter, defaultdict
-import random
-
-
-random.seed(42)
-
-# TODO: temp function to generate random scores: replace with real data
-def borough(level_transport, level_airbnb, level_housing):
-    score_ranges = {
-        "low": (0.05, 0.33),
-        "medium": (0.34, 0.66),
-        "high": (0.67, 0.98),
-    }
-
-    return {
-        "transportation_indicator": level_transport,
-        "airbnb_pressure_indicator": level_airbnb,
-        "housing_indicator": level_housing,
-
-        "transport_score": round(random.uniform(*score_ranges[level_transport]), 3),
-        "airbnb_score": round(random.uniform(*score_ranges[level_airbnb]), 3),
-        "housing_score": round(random.uniform(*score_ranges[level_housing]), 3),
-
-        "transport_rank": random.randint(1, 33),
-        "airbnb_rank": random.randint(1, 33),
-        "housing_rank": random.randint(1, 33),
-    }
 
 # Data lives here — swap for a real source if needed
-BOROUGH_DATA = {
-    "City of London": borough("low", "low", "high"),
-    "Barking and Dagenham": borough("medium", "high", "medium"),
-    "Barnet": borough("medium", "medium", "high"),
-    "Bexley": borough("low", "low", "medium"),
-    "Brent": borough("high", "high", "high"),
-    "Bromley": borough("medium", "low", "medium"),
-    "Camden": borough("high", "high", "high"),
-    "Croydon": borough("medium", "medium", "high"),
-    "Ealing": borough("high", "medium", "medium"),
-    "Enfield": borough("low", "medium", "medium"),
-    "Greenwich": borough("medium", "medium", "medium"),
-    "Hackney": borough("high", "high", "high"),
-    "Hammersmith and Fulham": borough("high", "high", "high"),
-    "Haringey": borough("medium", "high", "high"),
-    "Harrow": borough("medium", "medium", "medium"),
-    "Havering": borough("low", "low", "low"),
-    "Hillingdon": borough("medium", "medium", "medium"),
-    "Hounslow": borough("high", "medium", "medium"),
-    "Islington": borough("high", "high", "high"),
-    "Kensington and Chelsea": borough("high", "medium", "high"),
-    "Kingston upon Thames": borough("medium", "low", "medium"),
-    "Lambeth": borough("high", "high", "high"),
-    "Lewisham": borough("medium", "medium", "high"),
-    "Merton": borough("medium", "low", "medium"),
-    "Newham": borough("high", "high", "high"),
-    "Redbridge": borough("medium", "medium", "medium"),
-    "Richmond upon Thames": borough("medium", "low", "medium"),
-    "Southwark": borough("high", "high", "high"),
-    "Sutton": borough("low", "low", "low"),
-    "Tower Hamlets": borough("high", "high", "high"),
-    "Waltham Forest": borough("medium", "medium", "high"),
-    "Wandsworth": borough("high", "medium", "high"),
-    "Westminster": borough("high", "high", "high"),
-}
-
 INDICATOR_LABELS = {
     "transportation_indicator":   "Accessibility pressure",
     "airbnb_pressure_indicator":  "Airbnb pressure",

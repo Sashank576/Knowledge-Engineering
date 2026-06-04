@@ -1,6 +1,5 @@
 from dash import html
 import dash_cytoscape as cyto
-from components.map_column import BOROUGH_DATA
 
 INDICATORS = [
     "transportation_indicator",
