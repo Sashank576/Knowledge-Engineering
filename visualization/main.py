@@ -1,5 +1,5 @@
 from dash import Dash, html, Input, Output, callback
-from components import map_column, filters_column, details_column, selected_borough_panel
+from components import map_column, filters_column, similarity_column, selected_borough_panel
 import json
 from rdflib import Graph
 import time
@@ -84,7 +84,7 @@ app.layout = html.Div(
             children=[
                 filters_column.render(),
                 map_column.render(all_boroughs),
-                details_column.render(),
+                similarity_column.render(),
             ],
         ),
 
@@ -97,13 +97,18 @@ def filter_listings(listings, transport_levels, pressure_levels, housing_levels)
     Indicator values are looked up from map_column.BOROUGH_DATA, not stored
     on the listing itself.
     """
-    borough_data = map_column.BOROUGH_DATA
+    borough_data = all_boroughs
+
+    print(borough_data)
+
+    print(transport_levels, pressure_levels, housing_levels)
+
     return [
         l for l in listings
         if (row := borough_data.get(l["borough"])) is not None
-        and row["transportation_indicator"]  in (transport_levels or [])
-        and row["airbnb_pressure_indicator"] in (pressure_levels  or [])
-        and row["housing_indicator"]         in (housing_levels   or [])
+        and row["transportation_indicator"].lower()  in (transport_levels or [])
+        and row["airbnb_pressure_indicator"].lower() in (pressure_levels  or [])
+        and row["housing_indicator"].lower()         in (housing_levels   or [])
     ]
 
 
