@@ -62,6 +62,7 @@ for prop, (domain, range_) in object_properties.items():
 datatype_properties = {
     # Listing
     "listingID": ("Listing", XSD.integer),
+    "listingName": ("Listing", XSD.string),
     "latitude": ("Listing", XSD.float),
     "longitude": ("Listing", XSD.float),
     "priceNight": ("Listing", XSD.float),
@@ -107,6 +108,7 @@ for prop, (domain, range_) in datatype_properties.items():
 # Column mappings for new class files
 listing_literal_mapping = {
     "listingID": (EX.listingID, XSD.integer),
+    "listingName": (EX.listingName, XSD.string),
     "latitude": (EX.latitude, XSD.float),
     "longitude": (EX.longitude, XSD.float),
     "priceNight": (EX.priceNight, XSD.float),

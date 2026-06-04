@@ -130,6 +130,7 @@ print(df.shape)
 airbnb_df = df[
     [
         "id",
+        "name",
         "host_id",
         "neighbourhood",
         "latitude",
@@ -148,6 +149,7 @@ airbnb_df = df[
 # Rename columns
 airbnb_df = airbnb_df.rename(columns={
     "id": "listingID",
+    "name": "listingName",
     "host_id": "hostID",
     "neighbourhood": "borough",
     "room_type": "roomType",
