@@ -210,14 +210,32 @@ transport_pca["transport_accessibility_score"] = (
     )
 )
 
-print(transport_pca[["borough", "transport_accessibility_score"]])
+# Reverse accessibility into pressure
+# High accessibility -> Low pressure
+# Low accessibility -> High pressure
+transport_pca["transport_pressure_score"] = (
+    1 - transport_pca["transport_accessibility_score"]
+)
+
+print(
+    transport_pca[
+        [
+            "borough",
+            "transport_accessibility_score",
+            "transport_pressure_score"
+        ]
+    ]
+)
 print()
 
 # Merge to pressure df
 pressure = (
     pressure.merge(
         transport_pca[
-            ["borough", "transport_accessibility_score"]
+            [
+                "borough",
+                "transport_pressure_score"
+            ]
         ],
         on="borough",
         how="left"
@@ -239,11 +257,11 @@ pressure["housing_pressure_level"] = pd.qcut(
     labels=["Low", "Medium", "High"]
 )
 
-# Transport accessibility levels
-pressure["transport_accessibility_level"] = pd.qcut(
-    pressure["transport_accessibility_score"],
+# Transport pressure levels
+pressure["transport_pressure_level"] = pd.qcut(
+    pressure["transport_pressure_score"],
     q=3,
     labels=["Low", "Medium", "High"]
 )
 
-pressure.to_csv("data/combined_aggregate_scores.csv", index=False)
+pressure.to_csv("data/new_combined_aggregate_scores.csv", index=False)

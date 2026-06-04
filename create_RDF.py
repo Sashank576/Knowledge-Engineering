@@ -8,7 +8,7 @@ host_df = pd.read_csv("data/class_Host.csv")
 borough_df = pd.read_csv("data/class_Borough.csv")
 
 # Load Airbnb and Housing Pressure file
-all_scores_levels = pd.read_csv("data/combined_aggregate_scores.csv")
+all_scores_levels = pd.read_csv("data/new_combined_aggregate_scores.csv")
 
 # Load the borough profile similarity file
 borough_similarity = pd.read_csv("data/borough_profile_similarity.csv")
@@ -92,8 +92,8 @@ datatype_properties = {
     "airbnbPressureLevel": ("PressureIndicator", XSD.string),
     "housingPressureScore": ("HousingIndicator", XSD.float),
     "housingPressureLevel": ("HousingIndicator", XSD.string),
-    "transportAccessibilityScore": ("TransportIndicator", XSD.float),
-    "transportAccessibilityLevel": ("TransportIndicator", XSD.string),
+    "transportPressureScore": ("TransportIndicator", XSD.float),
+    "transportPressureLevel": ("TransportIndicator", XSD.string),
 
     # Profile similarity
     "similarityValue": ("ProfileSimilarity", XSD.float)
@@ -210,13 +210,13 @@ for _, row in all_scores_levels.iterrows():
         graph.add((housing_indicator, EX.housingPressureLevel,
                    Literal(row["housing_pressure_level"], datatype=XSD.string)))
 
-    if "transport_accessibility_score" in all_scores_levels.columns:
-        graph.add((transport_indicator, EX.transportAccessibilityScore,
-                   Literal(row["transport_accessibility_score"], datatype=XSD.float)))
+    if "transport_pressure_score" in all_scores_levels.columns:
+        graph.add((transport_indicator, EX.transportPressureScore,
+                Literal(row["transport_pressure_score"], datatype=XSD.float)))
 
-    if "transport_accessibility_level" in all_scores_levels.columns:
-        graph.add((transport_indicator, EX.transportAccessibilityLevel,
-                   Literal(row["transport_accessibility_level"], datatype=XSD.string)))
+    if "transport_pressure_level" in all_scores_levels.columns:
+        graph.add((transport_indicator, EX.transportPressureLevel,
+                Literal(row["transport_pressure_level"], datatype=XSD.string)))
 
 # Add borough profile similarity scores
 for _, row in borough_similarity.iterrows():
