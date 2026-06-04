@@ -3,6 +3,8 @@ from components import map_column, filters_column, details_column, selected_boro
 import json
 from rdflib import Graph
 import time
+from utilities.queries import GET_ALL_BOROUGHS
+from utilities.knowledge_graph import query_to_dataframe
 
 start = time.time()
 
@@ -53,7 +55,9 @@ AIRBNB_LISTINGS = [
 knowledge_graph = Graph()
 knowledge_graph.parse("assets/london_airbnb_kg.ttl", format="turtle")
 
-print("Triples loaded:", len(knowledge_graph))
+all_boroughs = query_to_dataframe(knowledge_graph, GET_ALL_BOROUGHS, ["name"])
+# make a list of the name of the borough the key
+all_boroughs = all_boroughs.set_index('name').to_dict('index')
 
 with open("assets/london_boroughs.geojson") as f:
     GEOJSON = json.load(f)
@@ -79,7 +83,7 @@ app.layout = html.Div(
             },
             children=[
                 filters_column.render(),
-                map_column.render(knowledge_graph),
+                map_column.render(all_boroughs),
                 details_column.render(),
             ],
         ),
@@ -124,7 +128,7 @@ def update_map(indicator, relayout_data, transport_levels, pressure_levels, hous
 
     visible = filter_listings(AIRBNB_LISTINGS, transport_levels, pressure_levels, housing_levels)
 
-    fig = map_column.build_figure(knowledge_graph, GEOJSON, indicator, visible, zoom=zoom, center=center)
+    fig = map_column.build_figure(all_boroughs, GEOJSON, indicator, visible, zoom=zoom, center=center)
     overlay_children = map_column.build_cooccurrence_overlay(indicator).children
     return fig, overlay_children
 

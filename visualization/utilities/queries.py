@@ -8,13 +8,13 @@ GET_ALL_BOROUGHS = """
         ?housing_indicator
         ?transportation_indicator
     WHERE {
-        ?borough ex:hasPressureIndicator ?presureIndicator .
-        ?presureIndicator ex:airbnbPressureLevel ?airbnb_pressure_indicator.
+        ?borough ex:hasPressureIndicator ?pressureIndicator .
+        ?pressureIndicator ex:airbnbPressureLevel ?airbnb_pressure_indicator .
     
         ?borough ex:hasHousingIndicator ?housingIndicator .
-        ?housingIndicator ex:housingPressureLevel ?housing_indicator.
+        ?housingIndicator ex:housingPressureLevel ?housing_indicator .
     
         ?borough ex:hasTransportIndicator ?transportIndicator .
-        ?transportIndicator ex:transportAccessibilityLevel ?transportation_indicator.
+        ?transportIndicator ex:transportPressureLevel ?transportation_indicator .
     }
 """
