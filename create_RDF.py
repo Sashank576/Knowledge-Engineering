@@ -71,6 +71,7 @@ datatype_properties = {
 
     # Host
     "hostID": ("Host", XSD.integer),
+    "hostName": ("Host", XSD.string),
     "hostListingCount": ("Host", XSD.integer),
 
     # Borough
@@ -118,6 +119,7 @@ listing_literal_mapping = {
 
 host_literal_mapping = {
     "hostID": (EX.hostID, XSD.integer),
+    "hostName": (EX.hostName, XSD.string),
     "hostListingCount": (EX.hostListingCount, XSD.integer),
 }
 

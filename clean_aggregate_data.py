@@ -132,6 +132,7 @@ airbnb_df = df[
         "id",
         "name",
         "host_id",
+        "host_name",
         "neighbourhood",
         "latitude",
         "longitude",
@@ -151,6 +152,7 @@ airbnb_df = airbnb_df.rename(columns={
     "id": "listingID",
     "name": "listingName",
     "host_id": "hostID",
+    "host_name": "hostName",
     "neighbourhood": "borough",
     "room_type": "roomType",
     "price": "priceNight",
@@ -173,10 +175,10 @@ airbnb_df["reviewsMonth"] = airbnb_df["reviewsMonth"].fillna(0)
 airbnb_df["reviewCount"] = airbnb_df["reviewCount"].fillna(0)
 
 # Split into Host class and Listing class
-host_df = airbnb_df[["hostID", "listingID", "hostListingCount"]]
+host_df = airbnb_df[["hostID", "hostName", "listingID", "hostListingCount"]]
 host_df.to_csv("data/class_Host.csv", index=False)
 
-listing_df = airbnb_df.drop(columns=["hostListingCount", "hostID"])
+listing_df = airbnb_df.drop(columns=["hostName", "hostListingCount", "hostID"])
 listing_df.to_csv("data/class_Listing.csv", index=False)
 
 # --------------------------------------------------------------
