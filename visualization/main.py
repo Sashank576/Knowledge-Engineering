@@ -5,29 +5,53 @@ from rdflib import Graph
 import time
 from utilities.queries import GET_ALL_BOROUGHS, GET_ALL_LISTINGS
 from utilities.knowledge_graph import query_to_dataframe
+import pandas as pd
 
 start = time.time()
 
 app = Dash()
 
-# Load RDF graph
-knowledge_graph = Graph()
-knowledge_graph.parse("assets/london_airbnb_kg.ttl", format="turtle")
+# # Load RDF graph
+# knowledge_graph = Graph()
+# knowledge_graph.parse("assets/london_airbnb_kg.ttl", format="turtle")
 
-all_boroughs = query_to_dataframe(knowledge_graph, GET_ALL_BOROUGHS, ["name"])
+# all_boroughs = query_to_dataframe(knowledge_graph, GET_ALL_BOROUGHS, ["name"])
+
+all_boroughs = pd.read_csv("assets/all_borough_indicators.csv")
+all_listings = pd.read_csv("assets/all_listings.csv")
+
 # calculate the rank for each borough
 all_boroughs['transport_rank'] = all_boroughs['transport_score'].rank(method='min').astype(int)
 all_boroughs['airbnb_rank']    = all_boroughs['airbnb_score'].rank(method='min').astype(int)
 all_boroughs['housing_rank']   = all_boroughs['housing_score'].rank(method='min').astype(int)
 
-# make a dict with the name of the borough as the key
-all_boroughs = all_boroughs.set_index('name').to_dict('index')
+# # make a dict with the name of the borough as the key
+# all_boroughs = all_boroughs.set_index('name').to_dict('index')
 
-all_listings = query_to_dataframe(knowledge_graph, GET_ALL_LISTINGS, ["name", "borough"]).to_dict('records')
+# Make a dict with the name of the borough as the key
+all_boroughs = (
+    all_boroughs
+    .rename(columns={"borough": "name"})  # if needed
+    .set_index("name")
+    .to_dict("index")
+)
+
+# all_listings = query_to_dataframe(knowledge_graph, GET_ALL_LISTINGS, ["name", "borough"]).to_dict('records')
+all_listings = all_listings.to_dict("records")
+
+# Load all entire-home listings in borough with both high Airbnb and housing pressure
+rq2_listings = pd.read_csv("assets/rq2_entire_home_examples.csv")
+rq2_listings = rq2_listings.to_dict("records")
+
+# Load all the multi-borough hosts
+rq3_hosts = pd.read_csv("assets/rq3_multiborough_hosts.csv")
+rq3_hosts = rq3_hosts.to_dict("records")
+
+# Load all the borough profile (cosine) similarity scores
+rq4_similarity = pd.read_csv("assets/rq4_similarity_pairs.csv")
 
 with open("assets/london_boroughs.geojson") as f:
     GEOJSON = json.load(f)
-
 
 end = time.time()
 length = end - start
@@ -54,7 +78,7 @@ app.layout = html.Div(
             ],
         ),
 
-        selected_borough_panel.render(all_boroughs),
+        selected_borough_panel.render(all_boroughs, rq2_listings, rq3_hosts, rq4_similarity),
     ],
 )
 def filter_listings(listings, transport_levels, pressure_levels, housing_levels):
@@ -113,7 +137,7 @@ def update_selected_borough_panel(clickData):
     if not borough:
         return selected_borough_panel.render_selected_borough(all_boroughs)
 
-    return selected_borough_panel.render_selected_borough(all_boroughs, borough)
+    return selected_borough_panel.render_selected_borough(all_boroughs, borough, rq2_listings, rq3_hosts, rq4_similarity)
 
 if __name__ == "__main__":
     app.run(debug=True)
