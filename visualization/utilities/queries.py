@@ -18,3 +18,22 @@ GET_ALL_BOROUGHS = """
         ?transportIndicator ex:transportPressureLevel ?transportation_indicator .
     }
 """
+
+GET_ALL_LISTINGS = """
+    PREFIX ex: <http://example.org/london-airbnb/>
+    
+    SELECT
+        (?listing as ?name)
+        ?borough
+        ?room_type
+        ?lat
+        ?lon
+    WHERE {
+        ?listing ex:isLocatedIn ?borough ;
+                 ex:hasRoomType ?roomType ;
+                 ex:latitude ?lat ;
+                 ex:longitude ?lon .        
+    
+         ?roomType ex:roomTypeName ?room_type .
+    }
+"""

@@ -3,7 +3,7 @@ from components import map_column, filters_column, similarity_column, selected_b
 import json
 from rdflib import Graph
 import time
-from utilities.queries import GET_ALL_BOROUGHS
+from utilities.queries import GET_ALL_BOROUGHS, GET_ALL_LISTINGS
 from utilities.knowledge_graph import query_to_dataframe
 
 start = time.time()
@@ -56,8 +56,10 @@ knowledge_graph = Graph()
 knowledge_graph.parse("assets/london_airbnb_kg.ttl", format="turtle")
 
 all_boroughs = query_to_dataframe(knowledge_graph, GET_ALL_BOROUGHS, ["name"])
-# make a list of the name of the borough the key
+# make a dict with the name of the borough as the key
 all_boroughs = all_boroughs.set_index('name').to_dict('index')
+
+all_listings = query_to_dataframe(knowledge_graph, GET_ALL_LISTINGS, ["name", "borough"]).to_dict('records')
 
 with open("assets/london_boroughs.geojson") as f:
     GEOJSON = json.load(f)
@@ -99,10 +101,6 @@ def filter_listings(listings, transport_levels, pressure_levels, housing_levels)
     """
     borough_data = all_boroughs
 
-    print(borough_data)
-
-    print(transport_levels, pressure_levels, housing_levels)
-
     return [
         l for l in listings
         if (row := borough_data.get(l["borough"])) is not None
@@ -131,7 +129,7 @@ def update_map(indicator, relayout_data, transport_levels, pressure_levels, hous
         if "mapbox.center" in relayout_data:
             center = relayout_data["mapbox.center"]
 
-    visible = filter_listings(AIRBNB_LISTINGS, transport_levels, pressure_levels, housing_levels)
+    visible = filter_listings(all_listings, transport_levels, pressure_levels, housing_levels)
 
     fig = map_column.build_figure(all_boroughs, GEOJSON, indicator, visible, zoom=zoom, center=center)
     overlay_children = map_column.build_cooccurrence_overlay(all_boroughs, indicator).children
