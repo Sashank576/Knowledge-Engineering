@@ -1,9 +1,9 @@
 from dash import html, dcc
 
 INDICATOR_OPTIONS = [
-    {"label": "Transportation Indicator", "value": "transportation_indicator"},
+    {"label": "Accessibility Pressure Indicator", "value": "transportation_indicator"},
     {"label": "Airbnb Pressure Indicator", "value": "airbnb_pressure_indicator"},
-    {"label": "Housing Indicator", "value": "housing_indicator"},
+    {"label": "Housing Pressure Indicator", "value": "housing_indicator"},
 ]
 
 LEVEL_COLORS = {
@@ -11,12 +11,6 @@ LEVEL_COLORS = {
     "medium": "#ffeb3b",   # same as map markers
     "high":   "#f44336",   # same as map markers
 }
-
-LISTING_FILTER_INDICATORS = [
-    ("transportation_indicator",  "Transportation Indicator Boroughs"),
-    ("airbnb_pressure_indicator", "Airbnb Pressure Indicator Boroughs"),
-    ("housing_indicator",         "Housing Indicator Boroughs"),
-]
 
 LEVELS = ["low", "medium", "high"]
 
@@ -73,6 +67,12 @@ def _checklist_group(indicator_key: str, label: str) -> html.Div:
 
 
 def render():
+    listing_filter_indicators = [
+        ("transportation_indicator", "Accessibility Pressure Indicator"),
+        ("airbnb_pressure_indicator", "Airbnb Pressure Indicator"),
+        ("housing_indicator", "Housing Pressure Indicator"),
+    ]
+
     return html.Div(
         style={
             'padding': '24px 16px',
@@ -115,7 +115,7 @@ def render():
 
             # --- Listing filters ---
             html.Div(
-                "Filter listings by",
+                "Filter listings by boroughs with:",
                 style={
                     'fontSize': '13px',
                     'fontWeight': '500',
@@ -125,7 +125,7 @@ def render():
             ),
             *[
                 _checklist_group(key, label)
-                for key, label in LISTING_FILTER_INDICATORS
+                for key, label in listing_filter_indicators
             ],
         ]
     )

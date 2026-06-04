@@ -129,7 +129,7 @@ def update_map(indicator, relayout_data, transport_levels, pressure_levels, hous
     visible = filter_listings(AIRBNB_LISTINGS, transport_levels, pressure_levels, housing_levels)
 
     fig = map_column.build_figure(all_boroughs, GEOJSON, indicator, visible, zoom=zoom, center=center)
-    overlay_children = map_column.build_cooccurrence_overlay(indicator).children
+    overlay_children = map_column.build_cooccurrence_overlay(all_boroughs, indicator).children
     return fig, overlay_children
 
 

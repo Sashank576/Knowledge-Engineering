@@ -66,18 +66,10 @@ BOROUGH_DATA = {
     "Westminster": borough("high", "high", "high"),
 }
 
-ALL_INDICATORS = ["transportation_indicator", "airbnb_pressure_indicator", "housing_indicator"]
-
 INDICATOR_LABELS = {
-    "transportation_indicator":   "Transport",
-    "airbnb_pressure_indicator":  "Airbnb Pressure",
-    "housing_indicator":          "Housing",
-}
-
-LEVEL_COLORS = {
-    "low":    "#4caf50",
-    "medium": "#f5a623",
-    "high":   "#f44336",
+    "transportation_indicator":   "Accessibility pressure",
+    "airbnb_pressure_indicator":  "Airbnb pressure",
+    "housing_indicator":          "Housing pressure",
 }
 
 # One trace per level — order here = legend order, guaranteed
@@ -88,17 +80,19 @@ LEVELS = [
 ]
 
 
-def build_cooccurrence_overlay(indicator: str) -> html.Div:
+def build_cooccurrence_overlay(all_boroughs, indicator: str) -> html.Div:
     """
     For boroughs where `indicator` == 'high', count how the OTHER
     two indicators are distributed across low / medium / high.
     """
-    other_indicators = [i for i in ALL_INDICATORS if i != indicator]
+    all_indicators = ["transportation_indicator", "airbnb_pressure_indicator", "housing_indicator"]
+
+    other_indicators = [i for i in all_indicators if i != indicator]
 
     # Collect only the high-pressure boroughs
     high_boroughs = [
-        data for data in BOROUGH_DATA.values()
-        if data.get(indicator) == "high"
+        data for data in all_boroughs.values()
+        if data.get(indicator) == "High"
     ]
     total = len(high_boroughs)
 
@@ -106,11 +100,17 @@ def build_cooccurrence_overlay(indicator: str) -> html.Div:
         return html.Div()
 
     def level_pill(level: str, count: int, total: int) -> html.Span:
+        level_colors = {
+            "Low": "#4caf50",
+            "Medium": "#ffeb3b",
+            "High": "#f44336",
+        }
+
         return html.Span(
             f"{level.capitalize()} {count}/{total}",
             style={
-                "backgroundColor": LEVEL_COLORS[level],
-                "color": "#fff" if level in ("high", "medium") else "#333",
+                "backgroundColor": level_colors[level],
+                "color": "#333",
                 "borderRadius": "4px",
                 "padding": "1px 7px",
                 "fontSize": "11px",
@@ -124,7 +124,7 @@ def build_cooccurrence_overlay(indicator: str) -> html.Div:
         counts = Counter(b[ind] for b in high_boroughs)
         pills = [
             level_pill(lvl, counts.get(lvl, 0), total)
-            for lvl in ["low", "medium", "high"]
+            for lvl in ["Low", "Medium", "High"]
             if counts.get(lvl, 0) > 0
         ]
         rows.append(html.Div(
@@ -228,8 +228,6 @@ def build_figure(all_boroughs, geojson, indicator: str, airbnb_listings: list[di
     e.g. [{"lat": 51.51, "lon": -0.12, "name": "Cosy flat in Hackney"}, ...]
     """
 
-    print(len(all_boroughs))
-
     # Bucket boroughs by level
     buckets = {"low": [], "medium": [], "high": []}
     for feature in geojson["features"]:
@@ -327,7 +325,7 @@ def render(all_boroughs, indicator: str = "transportation_indicator"):
         # position: relative so the overlay can anchor absolutely inside it
         style={"height": "100%", "position": "relative"},
         children=[
-            build_cooccurrence_overlay(indicator),
+            build_cooccurrence_overlay(all_boroughs, indicator),
             dcc.Graph(
                 id="choropleth-map",
                 figure=fig,
