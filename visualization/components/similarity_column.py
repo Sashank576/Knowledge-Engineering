@@ -12,14 +12,14 @@ MATCH_WEIGHTS = {3: 10, 2: 5, 1: 1}
 MIN_WEIGHT = 2  # only show boroughs sharing 2+ indicators — keeps edge count manageable
 
 
-def _build_elements():
-    boroughs = list(BOROUGH_DATA.keys())
+def _build_elements(all_boroughs):
+    boroughs = list(all_boroughs.keys())
     nodes = [{"data": {"id": b, "label": b}} for b in boroughs]
     edges = []
     for i, a in enumerate(boroughs):
         for b in boroughs[i + 1:]:
             matches = sum(
-                BOROUGH_DATA[a][ind] == BOROUGH_DATA[b][ind]
+                all_boroughs[a][ind] == all_boroughs[b][ind]
                 for ind in INDICATORS
             )
             weight = MATCH_WEIGHTS.get(matches, 0)
@@ -80,7 +80,7 @@ STYLESHEET = [
 ]
 
 
-def render():
+def render(all_boroughs):
     return html.Div(
         style={
             "height":        "100%",
@@ -104,25 +104,11 @@ def render():
                         "fontSize":   "13px",
                         "color":      "#333",
                     }),
-                    html.Button(
-                        "↺ Reset layout",
-                        id="reset-layout-btn",
-                        n_clicks=0,
-                        style={
-                            "fontSize":       "11px",
-                            "padding":        "4px 10px",
-                            "border":         "1px solid #cbd5e1",
-                            "borderRadius":   "4px",
-                            "backgroundColor":"#fff",
-                            "cursor":         "pointer",
-                            "color":          "#555",
-                        }
-                    ),
                 ]
             ),
             cyto.Cytoscape(
                 id="borough-graph",
-                elements=_build_elements(),
+                elements=_build_elements(all_boroughs),
                 layout={
                     "name":              "cose",
                     "animate":           False,  # compute fully before rendering — no timing issues

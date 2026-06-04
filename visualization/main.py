@@ -45,7 +45,7 @@ app.layout = html.Div(
             children=[
                 filters_column.render(),
                 map_column.render(all_boroughs),
-                similarity_column.render(),
+                similarity_column.render(all_boroughs),
             ],
         ),
 
