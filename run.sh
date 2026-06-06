@@ -19,9 +19,9 @@ source "$VENV_DIR/bin/activate"
 
 # Install dependencies
 echo "Installing dependencies..."
-python -m pip install --upgrade pip --quiet
-python -m pip install --quiet -r "$REQUIREMENTS"
+python3 -m pip install --upgrade pip
+python3 -m pip install -r "$REQUIREMENTS"
 
 # Run
 echo "Starting app..."
-python main.py
+python3 main.py
