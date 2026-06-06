@@ -413,7 +413,7 @@ def render(all_boroughs, rq2_listings, rq3_hosts, rq4_similarity):
         style={
             "height": "100%",
             "minHeight": 0,
-            "backgroundColor": "white",
+            "backgroundColor": COLORS['background'],
         },
         children=render_selected_borough(all_boroughs, rq2_listings=rq2_listings, rq3_hosts=rq3_hosts, rq4_similarity=rq4_similarity),
     )
