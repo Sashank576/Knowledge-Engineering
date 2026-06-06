@@ -1,4 +1,4 @@
-from dash import Dash, html, Input, Output, callback
+from dash import Dash, html, Input, Output, State, callback, ctx
 from components import map_column, filters_column, similarity_column, selected_borough_panel
 import json
 from rdflib import Graph
@@ -59,26 +59,102 @@ print("It took", length, "seconds to start the app!")
 
 app.layout = html.Div(
     style={
-        "display": "grid",
-        "gridTemplateRows": "68% 32%",
-        "height": "100vh",
+        "minHeight": "100vh",
+        "backgroundColor": "#F5F6FA",
         "boxSizing": "border-box",
+        "padding": "16px",
     },
     children=[
-        html.Div(
+        html.Button(
+            "☰ Filters",
+            id="open-filter-drawer",
+            n_clicks=0,
             style={
-                "display": "grid",
-                "gridTemplateColumns": "18% 57% 25%",
-                "minHeight": 0,
+                "backgroundColor": "black",
+                "color": "white",
+                "border": "none",
+                "borderRadius": "10px",
+                "padding": "10px 16px",
+                "fontWeight": "700",
+                "cursor": "pointer",
+                "marginBottom": "12px",
+            },
+        ),
+
+        html.Div(
+            id="filter-drawer",
+            style={
+                "position": "fixed",
+                "top": "0",
+                "left": "-320px",
+                "width": "300px",
+                "height": "100vh",
+                "backgroundColor": "white",
+                "zIndex": "9999",
+                "boxShadow": "4px 0 20px rgba(0,0,0,0.18)",
+                "transition": "left 0.25s ease",
+                "padding": "20px",
+                "boxSizing": "border-box",
+                "overflowY": "auto",
             },
             children=[
+                html.Button(
+                    "×",
+                    id="close-filter-drawer",
+                    n_clicks=0,
+                    style={
+                        "float": "right",
+                        "fontSize": "24px",
+                        "border": "none",
+                        "background": "none",
+                        "cursor": "pointer",
+                    },
+                ),
                 filters_column.render(),
-                map_column.render(all_boroughs),
-                similarity_column.render(all_boroughs),
             ],
         ),
 
-        selected_borough_panel.render(all_boroughs, rq2_listings, rq3_hosts, rq4_similarity),
+        html.Div(
+            style={
+                "backgroundColor": "white",
+                "borderRadius": "16px",
+                "padding": "8px",
+                "boxShadow": "0 2px 10px rgba(0,0,0,0.06)",
+                "marginBottom": "16px",
+            },
+            children=map_column.render(all_boroughs),
+        ),
+
+        html.Div(
+            style={
+                "display": "grid",
+                "gridTemplateColumns": "1fr 1fr",
+                "gap": "16px",
+            },
+            children=[
+                html.Div(
+                    style={
+                        "backgroundColor": "white",
+                        "borderRadius": "16px",
+                        "padding": "16px",
+                        "boxShadow": "0 2px 10px rgba(0,0,0,0.06)",
+                    },
+                    children=selected_borough_panel.render(
+                        all_boroughs, rq2_listings, rq3_hosts, rq4_similarity
+                    ),
+                ),
+
+                html.Div(
+                    style={
+                        "backgroundColor": "white",
+                        "borderRadius": "16px",
+                        "padding": "16px",
+                        "boxShadow": "0 2px 10px rgba(0,0,0,0.06)",
+                    },
+                    children=similarity_column.render(all_boroughs),
+                ),
+            ],
+        ),
     ],
 )
 def filter_listings(listings, transport_levels, pressure_levels, housing_levels):
@@ -138,6 +214,27 @@ def update_selected_borough_panel(clickData):
         return selected_borough_panel.render_selected_borough(all_boroughs)
 
     return selected_borough_panel.render_selected_borough(all_boroughs, borough, rq2_listings, rq3_hosts, rq4_similarity)
+
+
+@callback(
+    Output("filter-drawer", "style"),
+    Input("open-filter-drawer", "n_clicks"),
+    Input("close-filter-drawer", "n_clicks"),
+    State("filter-drawer", "style"),
+)
+def toggle_filter_drawer(_, __, current_style):
+    style = current_style.copy()
+
+    if not ctx.triggered_id:
+        return style
+
+    if ctx.triggered_id == "open-filter-drawer":
+        style["left"] = "0"
+
+    if ctx.triggered_id == "close-filter-drawer":
+        style["left"] = "-320px"
+
+    return style
 
 if __name__ == "__main__":
     app.run(debug=True)
