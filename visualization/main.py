@@ -6,6 +6,7 @@ import time
 from utilities.queries import GET_ALL_BOROUGHS, GET_ALL_LISTINGS
 from utilities.knowledge_graph import query_to_dataframe
 import pandas as pd
+from utilities.style import COLORS
 
 start = time.time()
 
@@ -60,36 +61,63 @@ print("It took", length, "seconds to start the app!")
 app.layout = html.Div(
     style={
         "minHeight": "100vh",
-        "backgroundColor": "#F5F6FA",
+        "backgroundColor": COLORS["background"],
+        "fontFamily": "Poppins, Arial, sans-serif",
         "boxSizing": "border-box",
-        "padding": "16px",
+        "padding": "14px",
     },
     children=[
-        html.Button(
-            "☰ Filters",
-            id="open-filter-drawer",
-            n_clicks=0,
+        # Header
+        html.Div(
             style={
-                "backgroundColor": "black",
-                "color": "white",
-                "border": "none",
-                "borderRadius": "10px",
-                "padding": "10px 16px",
-                "fontWeight": "700",
-                "cursor": "pointer",
-                "marginBottom": "12px",
+                "backgroundColor": COLORS["background"],
+                "borderRadius": "16px",
+                "padding": "12px 18px",
+                "marginBottom": "14px",
+                "border": "1px solid #E2E8F0",
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
             },
+            children=[
+                html.Div([
+                    html.H1(
+                        "London Accommodation Pressure Monitor",
+                        style={
+                            "margin": "0",
+                            "color": COLORS['primary_dark'],
+                            "fontSize": "26px",
+                            "fontWeight": "700",
+                        },
+                    ),
+                ]),
+                html.Button(
+                    "☰ Filters",
+                    id="open-filter-drawer",
+                    n_clicks=0,
+                    style={
+                        "backgroundColor": COLORS['primary_dark'],
+                        "color": "white",
+                        "border": "none",
+                        "borderRadius": "10px",
+                        "padding": "10px 16px",
+                        "fontWeight": "600",
+                        "cursor": "pointer",
+                    },
+                ),
+            ],
         ),
 
+        # Filter drawer
         html.Div(
             id="filter-drawer",
             style={
                 "position": "fixed",
                 "top": "0",
-                "left": "-320px",
-                "width": "300px",
+                "left": "-330px",
+                "width": "310px",
                 "height": "100vh",
-                "backgroundColor": "white",
+                "backgroundColor": COLORS["background"],
                 "zIndex": "9999",
                 "boxShadow": "4px 0 20px rgba(0,0,0,0.18)",
                 "transition": "left 0.25s ease",
@@ -104,10 +132,11 @@ app.layout = html.Div(
                     n_clicks=0,
                     style={
                         "float": "right",
-                        "fontSize": "24px",
+                        "fontSize": "26px",
                         "border": "none",
                         "background": "none",
                         "cursor": "pointer",
+                        "color": COLORS['primary_dark'],
                     },
                 ),
                 filters_column.render(),
@@ -116,40 +145,52 @@ app.layout = html.Div(
 
         html.Div(
             style={
-                "backgroundColor": "white",
-                "borderRadius": "16px",
-                "padding": "8px",
-                "boxShadow": "0 2px 10px rgba(0,0,0,0.06)",
-                "marginBottom": "16px",
-            },
-            children=map_column.render(all_boroughs),
-        ),
-
-        html.Div(
-            style={
                 "display": "grid",
-                "gridTemplateColumns": "1fr 1fr",
-                "gap": "16px",
+                "gridTemplateColumns": "28% 44% 28%",
+                "gap": "14px",
+                "height": "calc(100vh - 105px)",
+                "minHeight": "650px",
             },
             children=[
+                # Left: selected borough explorer
                 html.Div(
                     style={
-                        "backgroundColor": "white",
+                        "backgroundColor": COLORS["background"],
                         "borderRadius": "16px",
-                        "padding": "16px",
-                        "boxShadow": "0 2px 10px rgba(0,0,0,0.06)",
+                        "padding": "14px",
+                        "overflowY": "auto",
+                        "border": "1px solid #E2E8F0",
+                        "minHeight": 0,
                     },
                     children=selected_borough_panel.render(
-                        all_boroughs, rq2_listings, rq3_hosts, rq4_similarity
+                        all_boroughs,
+                        rq2_listings,
+                        rq3_hosts,
+                        rq4_similarity,
                     ),
                 ),
 
+                # Center: map
                 html.Div(
                     style={
-                        "backgroundColor": "white",
+                        "backgroundColor": COLORS["background"],
                         "borderRadius": "16px",
-                        "padding": "16px",
-                        "boxShadow": "0 2px 10px rgba(0,0,0,0.06)",
+                        "padding": "8px",
+                        "border": "1px solid #E2E8F0",
+                        "minHeight": 0,
+                    },
+                    children=map_column.render(all_boroughs),
+                ),
+
+                # Right: similarity graph
+                html.Div(
+                    style={
+                        "backgroundColor": COLORS["background"],
+                        "borderRadius": "16px",
+                        "padding": "14px",
+                        "overflowY": "auto",
+                        "border": "1px solid #E2E8F0",
+                        "minHeight": 0,
                     },
                     children=similarity_column.render(all_boroughs),
                 ),

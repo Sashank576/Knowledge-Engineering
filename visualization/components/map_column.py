@@ -12,11 +12,10 @@ INDICATOR_LABELS = {
 
 # One trace per level — order here = legend order, guaranteed
 LEVELS = [
-    ("low",    "#4caf50", "Low"),
-    ("medium", "#ffeb3b", "Medium"),
-    ("high",   "#f44336", "High"),
+    ("low",    "#7AA874", "Low"),
+    ("medium", "#D9B44A", "Medium"),
+    ("high",   "#C85A54", "High"),
 ]
-
 
 def build_cooccurrence_overlay(all_boroughs, indicator: str) -> html.Div:
     """
