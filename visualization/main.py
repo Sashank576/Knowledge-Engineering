@@ -1,10 +1,7 @@
-from dash import Dash, html, Input, Output, State, callback, ctx
+from dash import Dash, html, Input, Output, State, callback, ctx, no_update
 from components import map_column, filters_column, similarity_column, selected_borough_panel
 import json
-from rdflib import Graph
 import time
-from utilities.queries import GET_ALL_BOROUGHS, GET_ALL_LISTINGS
-from utilities.knowledge_graph import query_to_dataframe
 import pandas as pd
 from utilities.style import COLORS
 
@@ -12,22 +9,14 @@ start = time.time()
 
 app = Dash()
 
-# # Load RDF graph
-# knowledge_graph = Graph()
-# knowledge_graph.parse("assets/london_airbnb_kg.ttl", format="turtle")
-
-# all_boroughs = query_to_dataframe(knowledge_graph, GET_ALL_BOROUGHS, ["name"])
-
+# Load all listings and borough pressure indicators
 all_boroughs = pd.read_csv("assets/all_borough_indicators.csv")
 all_listings = pd.read_csv("assets/all_listings.csv")
 
-# calculate the rank for each borough
+# Calculate the rank for each borough
 all_boroughs['transport_rank'] = all_boroughs['transport_score'].rank(method='min').astype(int)
 all_boroughs['airbnb_rank']    = all_boroughs['airbnb_score'].rank(method='min').astype(int)
 all_boroughs['housing_rank']   = all_boroughs['housing_score'].rank(method='min').astype(int)
-
-# # make a dict with the name of the borough as the key
-# all_boroughs = all_boroughs.set_index('name').to_dict('index')
 
 # Make a dict with the name of the borough as the key
 all_boroughs = (
@@ -36,8 +25,6 @@ all_boroughs = (
     .set_index("name")
     .to_dict("index")
 )
-
-# all_listings = query_to_dataframe(knowledge_graph, GET_ALL_LISTINGS, ["name", "borough"]).to_dict('records')
 all_listings = all_listings.to_dict("records")
 
 # Load all entire-home listings in borough with both high Airbnb and housing pressure
@@ -192,7 +179,7 @@ app.layout = html.Div(
                         "border": "1px solid #E2E8F0",
                         "minHeight": 0,
                     },
-                    children=similarity_column.render(all_boroughs),
+                    children=similarity_column.render(all_boroughs, rq4_similarity),
                 ),
             ],
         ),
@@ -256,6 +243,15 @@ def update_selected_borough_panel(clickData):
 
     return selected_borough_panel.render_selected_borough(all_boroughs, borough, rq2_listings, rq3_hosts, rq4_similarity)
 
+@callback(
+    Output("similarity-graph", "figure"),
+    Input("similarity-threshold-slider", "value"),
+)
+def update_similarity(threshold):
+    return similarity_column.build_similarity_figure(
+        rq4_similarity,
+        threshold
+    )
 
 @callback(
     Output("filter-drawer", "style"),
@@ -276,6 +272,29 @@ def toggle_filter_drawer(_, __, current_style):
         style["left"] = "-320px"
 
     return style
+
+# Make it so that if you click on a borough node in the similarity graph, it will pull up that borough in the panel
+@callback(
+    Output("selected-borough-panel", "children", allow_duplicate=True),
+    Input("similarity-graph", "clickData"),
+    prevent_initial_call=True,
+)
+def update_selected_from_similarity(clickData):
+    if not clickData:
+        return no_update
+
+    borough = clickData["points"][0].get("customdata")
+
+    if not borough:
+        return no_update
+
+    return selected_borough_panel.render_selected_borough(
+        all_boroughs,
+        borough,
+        rq2_listings,
+        rq3_hosts,
+        rq4_similarity
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

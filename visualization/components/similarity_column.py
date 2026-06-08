@@ -1,133 +1,163 @@
-from dash import html
-import dash_cytoscape as cyto
+from dash import html, dcc
+import plotly.graph_objects as go
+import networkx as nx
 
-INDICATORS = [
-    "transportation_indicator",
-    "airbnb_pressure_indicator",
-    "housing_indicator",
-]
+def _build_graph(edges_df):
+    G = nx.Graph()
 
-MATCH_WEIGHTS = {3: 10, 2: 5, 1: 1}
-MIN_WEIGHT = 2  # only show boroughs sharing 2+ indicators — keeps edge count manageable
+    # Option 1: Use cutoff value
+    # Pro: clusters and lone nodes are very distinct
+    # Con: the idea that closer nodes rae most similar does not really apply anymore
+    edges_df = edges_df[edges_df["similarity"] >= 0.5]
+    # ^^^ Do not consider negative similarities when building the graph to improve layout
 
+    for _, row in edges_df.iterrows():
+        G.add_edge(
+            row["from_borough"],
+            row["to_borough"],
+            weight=row["similarity"]
+        )
 
-def _build_elements(all_boroughs):
-    boroughs = list(all_boroughs.keys())
-    nodes = [{"data": {"id": b, "label": b}} for b in boroughs]
-    edges = []
-    for i, a in enumerate(boroughs):
-        for b in boroughs[i + 1:]:
-            matches = sum(
-                all_boroughs[a][ind] == all_boroughs[b][ind]
-                for ind in INDICATORS
+    # Mainly change this to change at which places the nodes get shown
+    pos = nx.spring_layout(G, seed=7, weight="weight", k=10, iterations=575, scale=3)
+
+    # # Option 2: Build the node layout based on top-x most similar boroughs (nearest neighbors)
+    # # Pro: will conserve the idea that closer nodes are most similar
+    # # Con: will make it that even some nodes with 0 edges will still be part of a cluster
+    # edges_df = (
+    #     edges_df
+    #     .sort_values("similarity", ascending=False)
+    #     .groupby("from_borough")
+    #     .head(4)
+    # )
+    #
+    # for _, row in edges_df.iterrows():
+    #     G.add_edge(
+    #         row["from_borough"],
+    #         row["to_borough"],
+    #         weight=row["similarity"]
+    #     )
+    #
+    # pos = nx.spring_layout(G, weight="weight", seed=7, k=7, iterations=500, scale=3)
+    return G, pos
+
+def build_similarity_figure(edges_df, threshold):
+    G, pos = _build_graph(edges_df)
+
+    # Filter edges by similarity threshold
+    filtered = edges_df[edges_df["similarity"] >= threshold]
+
+    edge_traces = []
+
+    for _, row in filtered.iterrows():
+        a, b = row["from_borough"], row["to_borough"]
+        sim = row["similarity"]
+
+        x0, y0 = pos[a]
+        x1, y1 = pos[b]
+
+        # normalize similarity within visible range
+        sim_norm = (sim - threshold) / (1 - threshold)
+        sim_norm = max(0, min(1, sim_norm))
+
+        # opacity mapping (keep edges subtle)
+        opacity = 0.10 + 0.50 * sim_norm
+
+        edge_traces.append(
+            go.Scatter(
+                x=[x0, x1],
+                y=[y0, y1],
+                mode="lines",
+                hoverinfo="none",
+                line=dict(
+                    width=1.0 + 1.5 * sim_norm,
+                    color=f"rgba(80, 80, 80, {opacity})"
+                ),
+                showlegend=False,
             )
-            weight = MATCH_WEIGHTS.get(matches, 0)
-            if weight >= MIN_WEIGHT:
-                edges.append({
-                    "data": {
-                        "source":  a,
-                        "target":  b,
-                        "weight":  weight,
-                        "matches": matches,
-                    }
-                })
-    return nodes + edges
+        )
 
+    # node degrees (based on filtered graph)
+    degree = {n: 0 for n in G.nodes()}
+    for _, row in filtered.iterrows():
+        degree[row["from_borough"]] += 1
+        degree[row["to_borough"]] += 1
 
-def _edge_color(matches):
-    return {3: "#6366f1", 2: "#94a3b8", 1: "#e2e8f0"}.get(matches, "#e2e8f0")
+    node_x, node_y, node_text, node_size = [], [], [], []
 
+    for node in G.nodes():
+        x, y = pos[node]
+        node_x.append(x)
+        node_y.append(y)
 
-STYLESHEET = [
-    {
-        "selector": "node",
-        "style": {
-            "label":            "data(label)",
-            "font-size":        "8px",
-            "text-valign":      "center",
-            "text-halign":      "center",
-            "text-wrap":        "wrap",
-            "text-max-width":   "60px",
-            "width":            "50px",
-            "height":           "50px",
-            "background-color": "#475569",
-            "color":            "#fff",
-            "border-width":     "2px",
-            "border-color":     "#1e293b",
-        },
-    },
-    {
-        "selector": "node:selected",
-        "style": {
-            "background-color": "#6366f1",
-            "border-color":     "#4338ca",
-            "border-width":     "3px",
-        },
-    },
-    *[
-        {
-            "selector": f"edge[matches = {m}]",
-            "style": {
-                "line-color":  _edge_color(m),
-                "width":       MATCH_WEIGHTS[m] / 3,
-                "opacity":     0.4 + m * 0.15,
-                "curve-style": "bezier",
-            },
-        }
-        for m in [1, 2, 3]
-    ],
-]
+        d = degree[node]
+        node_size.append(5 + d * 2)
+        node_text.append(f"{node}<br>Connections: {d}")
 
+    node_trace = go.Scatter(
+        x=node_x,
+        y=node_y,
+        mode="markers+text",
+        text=list(G.nodes()),
+        textposition="top center",
+        hovertext=node_text,
+        hoverinfo="text",
 
-def render(all_boroughs):
+        # Identify clicked point (link to selected_borough_panel.py)
+        customdata=list(G.nodes()),
+
+        marker=dict(
+            size=node_size,
+            color="royalblue",
+            line=dict(width=1, color="black"),
+        ),
+    )
+
+    fig = go.Figure(data=edge_traces + [node_trace])
+
+    fig.update_layout(
+        showlegend=False,
+        plot_bgcolor="white",
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False),
+        margin=dict(l=0, r=0, t=30, b=0),
+    )
+
+    return fig
+
+def render(all_boroughs, rq4_similarity):
     return html.Div(
         style={
-            "height":        "100%",
-            "borderLeft":    "1px solid #e0e0e0",
-            "display":       "flex",
+            "height": "100%",
+            "borderLeft": "1px solid #e0e0e0",
+            "display": "flex",
             "flexDirection": "column",
         },
         children=[
             html.Div(
                 style={
-                    "padding":        "10px 16px",
-                    "borderBottom":   "1px solid #e0e0e0",
-                    "flexShrink":     "0",
-                    "display":        "flex",
-                    "alignItems":     "center",
-                    "justifyContent": "space-between",
+                    "padding": "10px 16px",
+                    "borderBottom": "1px solid #e0e0e0",
+                    "fontWeight": "600",
+                    "fontSize": "13px",
                 },
-                children=[
-                    html.Span("Borough similarity", style={
-                        "fontWeight": "600",
-                        "fontSize":   "13px",
-                        "color":      "#333",
-                    }),
-                ]
+                children="Borough similarity",
             ),
-            cyto.Cytoscape(
-                id="borough-graph",
-                elements=_build_elements(all_boroughs),
-                layout={
-                    "name":              "cose",
-                    "animate":           False,  # compute fully before rendering — no timing issues
-                    "randomize":         True,
-                    "nodeDimensionsIncludeLabels": True,
-                    "idealEdgeLength":   100,
-                    "nodeOverlap":       20,
-                    "nodeRepulsion":     400000,
-                    "edgeElasticity":    100,
-                    "nestingFactor":     5,
-                    "gravity":           80,
-                    "numIter":           1000,
-                    "fit":               True,
-                    "padding":           30,
-                    "componentSpacing":  100,
-                },
-                stylesheet=STYLESHEET,
+
+            # Slider
+            dcc.Slider(
+                id="similarity-threshold-slider",
+                min=0.90,
+                max=1.00,
+                step=0.01,
+                value=0.90,
+                marks={0.9: "0.9", 1.0: "1.0"},
+            ),
+
+            # Graph
+            dcc.Graph(
+                id="similarity-graph",
                 style={"flex": "1"},
-                minZoom=0.2,
-                maxZoom=3.0,
             ),
-        ]
+        ],
     )

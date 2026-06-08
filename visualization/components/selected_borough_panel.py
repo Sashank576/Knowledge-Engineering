@@ -381,7 +381,7 @@ def render_selected_borough(
                 children=(
                     [_listing_card(listing) for listing in top_listings]
                     if top_listings
-                    else [_empty_state("No relevant entire-home listings for this borough.")]
+                    else [_empty_state("No relevant entire-home listings for this borough. Please select a high-pressure (Airbnb + Housing) borough. Such boroughs can be found using the filter tool.")]
                 ),
             ),
 
