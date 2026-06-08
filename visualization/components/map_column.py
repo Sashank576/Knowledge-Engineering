@@ -2,6 +2,7 @@ from dash import html, dcc
 import plotly.graph_objects as go
 import json
 from collections import Counter, defaultdict
+from utilities.style import COLORS
 
 # Data lives here — swap for a real source if needed
 INDICATOR_LABELS = {
@@ -12,9 +13,9 @@ INDICATOR_LABELS = {
 
 # One trace per level — order here = legend order, guaranteed
 LEVELS = [
-    ("low",    "#7AA874", "Low"),
-    ("medium", "#D9B44A", "Medium"),
-    ("high",   "#C85A54", "High"),
+    ("low",    COLORS["low"], "Low"),
+    ("medium", COLORS["medium"], "Medium"),
+    ("high",   COLORS["high"], "High"),
 ]
 
 def build_cooccurrence_overlay(all_boroughs, indicator: str) -> html.Div:
@@ -37,16 +38,11 @@ def build_cooccurrence_overlay(all_boroughs, indicator: str) -> html.Div:
         return html.Div()
 
     def level_pill(level: str, count: int, total: int) -> html.Span:
-        level_colors = {
-            "Low": "#4caf50",
-            "Medium": "#ffeb3b",
-            "High": "#f44336",
-        }
 
         return html.Span(
             f"{level.capitalize()} {count}/{total}",
             style={
-                "backgroundColor": level_colors[level],
+                "backgroundColor": COLORS[level.lower()],
                 "color": "#333",
                 "borderRadius": "4px",
                 "padding": "1px 7px",
@@ -217,8 +213,8 @@ def build_figure(all_boroughs, geojson, indicator: str, airbnb_listings: list[di
                 mode="markers+text" if is_clustered else "markers",
                 marker=dict(
                     size=sizes,
-                    color="#0077ff",   # blue
-                    opacity=0.7,
+                    color="#23395D",   # blue
+                    opacity=0.6,
                 ),
                 text=texts,
                 textfont=dict(size=10, color="#fff"),
@@ -252,7 +248,7 @@ def build_figure(all_boroughs, geojson, indicator: str, airbnb_listings: list[di
     return fig
 
 
-def render(all_boroughs, indicator: str = "transportation_indicator"):
+def render(all_boroughs, indicator: str = "airbnb_pressure_indicator"):
     with open("assets/london_boroughs.geojson") as f:
         geojson = json.load(f)
 

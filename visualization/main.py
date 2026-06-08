@@ -133,7 +133,7 @@ app.layout = html.Div(
         html.Div(
             style={
                 "display": "grid",
-                "gridTemplateColumns": "28% 44% 28%",
+                "gridTemplateColumns": "25% 50% 25%",
                 "gap": "14px",
                 "height": "calc(100vh - 105px)",
                 "minHeight": "650px",

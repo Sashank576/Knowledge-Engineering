@@ -10,7 +10,9 @@ COLORS = {
 
     "border": "#E2E8F0",
 
-    "low": "#7AA874",
-    "medium": "#D9B44A",
-    "high": "#C85A54",
+    "low": "#deebf7",
+    "medium": "#6baed6",
+    "high": "#2171b5",
 }
+
+

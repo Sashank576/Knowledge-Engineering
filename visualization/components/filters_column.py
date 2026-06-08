@@ -1,4 +1,5 @@
 from dash import html, dcc
+from utilities.style import COLORS
 
 INDICATOR_OPTIONS = [
     {"label": "Accessibility Pressure Indicator", "value": "transportation_indicator"},
@@ -6,11 +7,6 @@ INDICATOR_OPTIONS = [
     {"label": "Housing Pressure Indicator", "value": "housing_indicator"},
 ]
 
-LEVEL_COLORS = {
-    "low":    "#4caf50",   # same as map markers
-    "medium": "#ffeb3b",   # same as map markers
-    "high":   "#f44336",   # same as map markers
-}
 
 LEVELS = ["low", "medium", "high"]
 
@@ -41,7 +37,7 @@ def _checklist_group(indicator_key: str, label: str) -> html.Div:
                                 "label": html.Span(
                                     lvl.capitalize(),
                                     style={
-                                        "backgroundColor": LEVEL_COLORS[lvl],
+                                        "backgroundColor": COLORS[lvl.lower()],
                                         "color": "#000",
                                         "borderRadius": "4px",
                                         "padding": "1px 8px",
@@ -108,7 +104,7 @@ def render():
             dcc.Dropdown(
                 id="indicator-dropdown",
                 options=INDICATOR_OPTIONS,
-                value="transportation_indicator",
+                value="airbnb_pressure_indicator",
                 clearable=False,
                 style={'fontSize': '13px', 'marginBottom': '28px'},
             ),

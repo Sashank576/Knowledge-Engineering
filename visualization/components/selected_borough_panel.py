@@ -4,13 +4,6 @@ from utilities.style import COLORS
 
 
 
-def _level_color(level):
-    return {
-        "Low": "#7AA874",
-        "Medium": "#D9B44A",
-        "High": "#C85A54",
-    }.get(str(level).title(), "#94A3B8")
-
 
 def _normalize_borough(name):
     return str(name).replace("_", " ").strip().lower()
@@ -55,7 +48,7 @@ def _score_card(title, score, level, rank):
                     html.Span(
                         level,
                         style={
-                            "backgroundColor": _level_color(level),
+                            "backgroundColor": COLORS[level.lower()],
                             "color": "#FFFFFF" if level != "Medium" else "#111827",
                             "padding": "3px 8px",
                             "borderRadius": "999px",
