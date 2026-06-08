@@ -49,7 +49,7 @@ def _score_card(title, score, level, rank):
                         level,
                         style={
                             "backgroundColor": COLORS[level.lower()],
-                            "color": "#FFFFFF" if level != "Medium" else "#111827",
+                            "color": "#111827" if level == "Low" else "#fff",
                             "padding": "3px 8px",
                             "borderRadius": "999px",
                             "fontSize": "11px",

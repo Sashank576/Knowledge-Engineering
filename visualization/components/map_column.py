@@ -43,7 +43,7 @@ def build_cooccurrence_overlay(all_boroughs, indicator: str) -> html.Div:
             f"{level.capitalize()} {count}/{total}",
             style={
                 "backgroundColor": COLORS[level.lower()],
-                "color": "#333",
+                "color": "#111827" if level == "Low" else "#fff",
                 "borderRadius": "4px",
                 "padding": "1px 7px",
                 "fontSize": "11px",
