@@ -38,7 +38,7 @@ def _checklist_group(indicator_key: str, label: str) -> html.Div:
                                     lvl.capitalize(),
                                     style={
                                         "backgroundColor": COLORS[lvl.lower()],
-                                        "color": "#000",
+                                        "color": "#fff" if lvl != "low" else "#000",
                                         "borderRadius": "4px",
                                         "padding": "1px 8px",
                                         "fontSize": "12px",
