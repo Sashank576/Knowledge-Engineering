@@ -68,30 +68,48 @@ app.layout = html.Div(
             },
             children=[
                 html.Div([
-                    html.H1(
-                        "London Accommodation Pressure Monitor",
+                    # Left side: Logo + Title
+                    html.Div([
+                        html.Img(
+                            src="/assets/underground-logo.png",
+                            style={
+                                "height": "50px",
+                                "width": "auto",
+                                "marginRight": "5px",
+                            },
+                        ),
+                        html.H1(
+                            "London Accommodation Pressure Monitor",
+                            style={
+                                "margin": "0",
+                                "color": COLORS['primary_dark'],
+                                "fontSize": "26px",
+                                "fontWeight": "700",
+                            },
+                        ),
+                    ], style={"display": "flex", "alignItems": "center", "gap": "12px"}),
+
+                    # Right side: Button
+                    html.Button(
+                        "☰ Filters",
+                        id="open-filter-drawer",
+                        n_clicks=0,
                         style={
-                            "margin": "0",
-                            "color": COLORS['primary_dark'],
-                            "fontSize": "26px",
-                            "fontWeight": "700",
+                            "backgroundColor": COLORS['primary_dark'],
+                            "color": "white",
+                            "border": "none",
+                            "borderRadius": "10px",
+                            "padding": "10px 16px",
+                            "fontWeight": "600",
+                            "cursor": "pointer",
                         },
                     ),
-                ]),
-                html.Button(
-                    "☰ Filters",
-                    id="open-filter-drawer",
-                    n_clicks=0,
-                    style={
-                        "backgroundColor": COLORS['primary_dark'],
-                        "color": "white",
-                        "border": "none",
-                        "borderRadius": "10px",
-                        "padding": "10px 16px",
-                        "fontWeight": "600",
-                        "cursor": "pointer",
-                    },
-                ),
+                ], style={
+                    "display": "flex",
+                    "justifyContent": "space-between",  # pushes button to the right
+                    "alignItems": "center",
+                    "width": "100%",
+                }),
             ],
         ),
 
