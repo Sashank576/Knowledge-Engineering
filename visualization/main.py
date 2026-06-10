@@ -3,7 +3,7 @@ from components import map_column, filters_column, similarity_column, selected_b
 import json
 import time
 import pandas as pd
-from utilities.style import COLORS
+from utilities.style import COLORS, PANEL_STYLE
 
 start = time.time()
 
@@ -14,9 +14,9 @@ all_boroughs = pd.read_csv("assets/all_borough_indicators.csv")
 all_listings = pd.read_csv("assets/all_listings.csv")
 
 # Calculate the rank for each borough
-all_boroughs['transport_rank'] = all_boroughs['transport_score'].rank(method='min').astype(int)
-all_boroughs['airbnb_rank']    = all_boroughs['airbnb_score'].rank(method='min').astype(int)
-all_boroughs['housing_rank']   = all_boroughs['housing_score'].rank(method='min').astype(int)
+all_boroughs['transport_rank'] = all_boroughs['transport_score'].rank(method='min', ascending=False).astype(int)
+all_boroughs['airbnb_rank']    = all_boroughs['airbnb_score'].rank(method='min', ascending=False).astype(int)
+all_boroughs['housing_rank']   = all_boroughs['housing_score'].rank(method='min', ascending=False).astype(int)
 
 # Make a dict with the name of the borough as the key
 all_boroughs = (
@@ -49,19 +49,21 @@ app.layout = html.Div(
     style={
         "minHeight": "100vh",
         "backgroundColor": COLORS["background"],
-        "fontFamily": "Poppins, Arial, sans-serif",
+        "fontFamily": "Inter, sans-serif",
         "boxSizing": "border-box",
-        "padding": "14px",
+        "padding": "18px",
     },
     children=[
         # Header
         html.Div(
             style={
-                "backgroundColor": COLORS["background"],
-                "borderRadius": "16px",
-                "padding": "12px 18px",
-                "marginBottom": "14px",
-                "border": "1px solid #E2E8F0",
+                "backgroundColor": COLORS["surface"],
+                "backdropFilter": "blur(10px)",
+                "borderRadius": "20px",
+                "padding": "14px 20px",
+                "marginBottom": "16px",
+                "border": f"1px solid {COLORS['border']}",
+                "boxShadow": COLORS["shadow_soft"],
                 "display": "flex",
                 "alignItems": "center",
                 "justifyContent": "space-between",
@@ -73,9 +75,8 @@ app.layout = html.Div(
                         html.Img(
                             src="/assets/underground-logo.png",
                             style={
-                                "height": "50px",
+                                "height": "48px",
                                 "width": "auto",
-                                "marginRight": "5px",
                             },
                         ),
                         html.H1(
@@ -84,7 +85,7 @@ app.layout = html.Div(
                                 "margin": "0",
                                 "color": COLORS['primary_dark'],
                                 "fontSize": "26px",
-                                "fontWeight": "700",
+                                "fontWeight": "800",
                             },
                         ),
                     ], style={"display": "flex", "alignItems": "center", "gap": "12px"}),
@@ -98,10 +99,11 @@ app.layout = html.Div(
                             "backgroundColor": COLORS['primary_dark'],
                             "color": "white",
                             "border": "none",
-                            "borderRadius": "10px",
-                            "padding": "10px 16px",
-                            "fontWeight": "600",
+                            "borderRadius": "999px",
+                            "padding": "11px 18px",
+                            "fontWeight": "700",
                             "cursor": "pointer",
+                            "boxShadow": "0 8px 18px rgba(27,45,73,0.22)",
                         },
                     ),
                 ], style={
@@ -119,17 +121,17 @@ app.layout = html.Div(
             style={
                 "position": "fixed",
                 "top": "0",
-                "left": "-330px",
-                "width": "310px",
-                "height": "100vh",
-                "backgroundColor": COLORS["background"],
+                "left": "-360px",
+                "width": "340px",
+                "height": "100%",
+                "backgroundColor": COLORS["surface"],
                 "zIndex": "9999",
                 "boxShadow": "4px 0 20px rgba(0,0,0,0.18)",
                 "transition": "left 0.25s ease",
                 "padding": "20px",
                 "boxSizing": "border-box",
                 "overflowY": "auto",
-            },
+            },            
             children=[
                 html.Button(
                     "×",
@@ -151,21 +153,18 @@ app.layout = html.Div(
         html.Div(
             style={
                 "display": "grid",
-                "gridTemplateColumns": "25% 50% 25%",
+                "gridTemplateColumns": "2fr 5fr 3fr",
                 "gap": "14px",
-                "height": "calc(100vh - 105px)",
+                "height": "calc(100vh - 118px)",
                 "minHeight": "650px",
             },
             children=[
                 # Left: selected borough explorer
                 html.Div(
                     style={
-                        "backgroundColor": COLORS["background"],
-                        "borderRadius": "16px",
-                        "padding": "14px",
+                        **PANEL_STYLE,
+                        "padding": "16px",
                         "overflowY": "auto",
-                        "border": "1px solid #E2E8F0",
-                        "minHeight": 0,
                     },
                     children=selected_borough_panel.render(
                         all_boroughs,
@@ -178,11 +177,8 @@ app.layout = html.Div(
                 # Center: map
                 html.Div(
                     style={
-                        "backgroundColor": COLORS["background"],
-                        "borderRadius": "16px",
-                        "padding": "8px",
-                        "border": "1px solid #E2E8F0",
-                        "minHeight": 0,
+                        **PANEL_STYLE,
+                        "padding": "10px",
                     },
                     children=map_column.render(all_boroughs),
                 ),
@@ -190,12 +186,9 @@ app.layout = html.Div(
                 # Right: similarity graph
                 html.Div(
                     style={
-                        "backgroundColor": COLORS["background"],
-                        "borderRadius": "16px",
-                        "padding": "14px",
+                        **PANEL_STYLE,
+                        "padding": "16px",
                         "overflowY": "auto",
-                        "border": "1px solid #E2E8F0",
-                        "minHeight": 0,
                     },
                     children=similarity_column.render(all_boroughs, rq4_similarity),
                 ),
@@ -277,17 +270,14 @@ def update_similarity(threshold):
     Input("close-filter-drawer", "n_clicks"),
     State("filter-drawer", "style"),
 )
-def toggle_filter_drawer(_, __, current_style):
+def toggle_filter_drawer(open_clicks, close_clicks, current_style):
     style = current_style.copy()
 
-    if not ctx.triggered_id:
-        return style
-
     if ctx.triggered_id == "open-filter-drawer":
-        style["left"] = "0"
+        style["left"] = "-360px" if style.get("left") == "0" else "0"
 
-    if ctx.triggered_id == "close-filter-drawer":
-        style["left"] = "-320px"
+    elif ctx.triggered_id == "close-filter-drawer":
+        style["left"] = "-360px"
 
     return style
 

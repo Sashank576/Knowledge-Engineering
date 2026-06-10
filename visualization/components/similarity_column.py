@@ -1,6 +1,7 @@
 from dash import html, dcc
 import plotly.graph_objects as go
 import networkx as nx
+from utilities.style import COLORS
 
 def _build_graph(edges_df):
     G = nx.Graph()
@@ -108,7 +109,8 @@ def build_similarity_figure(edges_df, threshold):
 
         marker=dict(
             size=node_size,
-            color="royalblue",
+            color=COLORS["primary"],
+            opacity=0.9,
             line=dict(width=1, color="black"),
         ),
     )
@@ -116,7 +118,12 @@ def build_similarity_figure(edges_df, threshold):
     fig = go.Figure(data=edge_traces + [node_trace])
 
     fig.update_layout(
+        font=dict(
+            family="Inter, sans-serif",
+            color=COLORS["primary_dark"],
+        ),
         showlegend=False,
+        paper_bgcolor="white",
         plot_bgcolor="white",
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
@@ -129,19 +136,18 @@ def render(all_boroughs, rq4_similarity):
     return html.Div(
         style={
             "height": "100%",
-            "borderLeft": "1px solid #e0e0e0",
+            "backgroundColor": "transparent",
             "display": "flex",
             "flexDirection": "column",
         },
         children=[
-            html.Div(
+            html.H3(
+                "Borough Similarity",
                 style={
-                    "padding": "10px 16px",
-                    "borderBottom": "1px solid #e0e0e0",
-                    "fontWeight": "600",
-                    "fontSize": "13px",
+                    "marginTop": 0,
+                    "color": COLORS['primary_dark'],
+                    "fontSize": "18px",
                 },
-                children="Borough similarity",
             ),
 
             # Slider

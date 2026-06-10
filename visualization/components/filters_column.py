@@ -20,7 +20,7 @@ def _checklist_group(indicator_key: str, label: str) -> html.Div:
                 style={
                     "fontSize": "12px",
                     "fontWeight": "600",
-                    "color": "#444",
+                    "color": COLORS['text_secondary'],
                     "marginBottom": "6px",
                     "textTransform": "uppercase",
                     "letterSpacing": "0.04em",
@@ -71,11 +71,10 @@ def render():
 
     return html.Div(
         style={
-            'padding': '24px 16px',
-            'borderRight': '1px solid #e0e0e0',
+            'padding': '18px 8px 24px 8px',
             'height': '100%',
             'boxSizing': 'border-box',
-            'backgroundColor': '#fafafa',
+            'backgroundColor': COLORS['surface'],
             'overflowY': 'auto',
         },
         children=[
@@ -84,9 +83,9 @@ def render():
                 style={
                     'marginTop': 0,
                     'marginBottom': '24px',
-                    'fontSize': '16px',
-                    'fontWeight': '600',
-                    'color': '#333',
+                    'fontSize': '18px',
+                    'fontWeight': '800',
+                    'color': COLORS['primary_dark'],
                 }
             ),
 
@@ -96,7 +95,7 @@ def render():
                 style={
                     'fontSize': '13px',
                     'fontWeight': '500',
-                    'color': '#555',
+                    'color': COLORS['text_secondary'],
                     'marginBottom': '8px',
                     'display': 'block',
                 }
@@ -115,7 +114,7 @@ def render():
                 style={
                     'fontSize': '13px',
                     'fontWeight': '500',
-                    'color': '#555',
+                    'color': COLORS['text_secondary'],
                     'marginBottom': '14px',
                 }
             ),

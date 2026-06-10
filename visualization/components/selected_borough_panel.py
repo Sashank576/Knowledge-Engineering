@@ -15,9 +15,10 @@ def _score_card(title, score, level, rank):
     return html.Div(
         style={
             "border": f"1px solid {COLORS['border']}",
-            "borderRadius": "12px",
-            "padding": "10px",
+            "borderRadius": "14px",
+            "padding": "12px",
             "backgroundColor": COLORS['card'],
+            "boxShadow": COLORS['shadow_soft'],
         },
         children=[
             html.Div(
@@ -34,7 +35,7 @@ def _score_card(title, score, level, rank):
                     "display": "flex",
                     "alignItems": "center",
                     "justifyContent": "space-between",
-                    "gap": "8px",
+                    "gap": "10px",
                 },
                 children=[
                     html.Span(
@@ -99,9 +100,9 @@ def _listing_card(listing):
     return html.Div(
         style={
             "padding": "10px",
-            "borderRadius": "10px",
+            "borderRadius": "12px",
             "border": f"1px solid {COLORS['border']}",
-            "backgroundColor": COLORS['card'],
+            "backgroundColor": COLORS['card_muted'],
         },
         children=[
             html.Div(
@@ -129,9 +130,9 @@ def _host_card(host):
     return html.Div(
         style={
             "padding": "10px",
-            "borderRadius": "10px",
+            "borderRadius": "12px",
             "border": f"1px solid {COLORS['border']}",
-            "backgroundColor": COLORS['card'],
+            "backgroundColor": COLORS['card_muted'],
         },
         children=[
             html.Div(
@@ -296,7 +297,7 @@ def render_selected_borough(
                 borough,
                 style={
                     "margin": "0 0 12px 0",
-                    "fontSize": "22px",
+                    "fontSize": "24px",
                     "fontWeight": "700",
                     "color": COLORS['primary_dark'],
                     "lineHeight": "1.2",
@@ -307,7 +308,7 @@ def render_selected_borough(
                 style={
                     "display": "grid",
                     "gridTemplateColumns": "1fr",
-                    "gap": "8px",
+                    "gap": "10px",
                 },
                 children=[
                     _score_card(
@@ -323,7 +324,7 @@ def render_selected_borough(
                         data["housing_rank"],
                     ),
                     _score_card(
-                        "Accessibility",
+                        "Accessibility pressure",
                         data["transport_score"],
                         data["transportation_indicator"],
                         data["transport_rank"],
@@ -367,7 +368,7 @@ def render_selected_borough(
                 style={
                     "display": "flex",
                     "flexDirection": "column",
-                    "gap": "8px",
+                    "gap": "10px",
                     "maxHeight": "260px",
                     "overflowY": "auto",
                 },
@@ -386,7 +387,7 @@ def render_selected_borough(
                 style={
                     "display": "flex",
                     "flexDirection": "column",
-                    "gap": "8px",
+                    "gap": "10px",
                     "maxHeight": "260px",
                     "overflowY": "auto",
                 },
@@ -406,7 +407,7 @@ def render(all_boroughs, rq2_listings, rq3_hosts, rq4_similarity):
         style={
             "height": "100%",
             "minHeight": 0,
-            "backgroundColor": COLORS['background'],
+            "backgroundColor": "transparent",
         },
         children=render_selected_borough(all_boroughs, rq2_listings=rq2_listings, rq3_hosts=rq3_hosts, rq4_similarity=rq4_similarity),
     )

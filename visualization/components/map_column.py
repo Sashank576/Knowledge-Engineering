@@ -83,10 +83,12 @@ def build_cooccurrence_overlay(all_boroughs, indicator: str) -> html.Div:
             "top": "12px",
             "left": "12px",
             "zIndex": 999,
-            "backgroundColor": "rgba(255,255,255,0.92)",
-            "borderRadius": "8px",
-            "padding": "10px 14px",
-            "boxShadow": "0 1px 6px rgba(0,0,0,0.15)",
+            "backgroundColor": "rgba(255,255,255,0.94)",
+            "backdropFilter": "blur(8px)",
+            "border": f"1px solid {COLORS['border']}",
+            "borderRadius": "14px",
+            "padding": "12px 14px",
+            "boxShadow": (COLORS["shadow_soft"], "0 1px 6px rgba(0,0,0,0.15)"),
             "minWidth": "190px",
             "pointerEvents": "none",  # don't block map interactions
         },
@@ -186,8 +188,8 @@ def build_figure(all_boroughs, geojson, indicator: str, airbnb_listings: list[di
                 colorscale=[[0, colour], [1, colour]],
                 showscale=False,
                 marker_opacity=1,            # opacity of the boroughs
-                marker_line_width=1,         # thickness of the line between the boroughs
-                marker_line_color="#000000", # color of the line between the boroughs
+                marker_line_width=0.8,       # thickness of the line between the boroughs
+                marker_line_color="#FFFFFF", # color of the line between the boroughs
                 hovertemplate="<b>%{location}</b><br>"
                               + indicator.replace("_", " ").title()
                               + f": {label}<extra></extra>",
@@ -213,8 +215,8 @@ def build_figure(all_boroughs, geojson, indicator: str, airbnb_listings: list[di
                 mode="markers+text" if is_clustered else "markers",
                 marker=dict(
                     size=sizes,
-                    color="#23395D",   # blue
-                    opacity=0.6,
+                    color=COLORS["primary"],
+                    opacity=0.72,
                 ),
                 text=texts,
                 textfont=dict(size=10, color="#fff"),
@@ -229,6 +231,10 @@ def build_figure(all_boroughs, geojson, indicator: str, airbnb_listings: list[di
         )
 
     fig.update_layout(
+        font=dict(
+            family="Inter, sans-serif",
+            color=COLORS["primary_dark"],
+        ),
         mapbox_style="white-bg",
         mapbox_zoom=zoom,
         mapbox_center=center if center else {"lat": 51.5074, "lon": -0.1278},
@@ -239,7 +245,9 @@ def build_figure(all_boroughs, geojson, indicator: str, airbnb_listings: list[di
         # This prevents the legend from forcing a margin on the right side
         legend=dict(
             title=dict(text="Indicator"),
-            bgcolor="rgba(255,255,255,0.8)",
+            bgcolor="rgba(255,255,255,0.92)",
+            bordercolor=COLORS["border"],
+            borderwidth=1,
             x=0.82,  # Move it to the left so it doesn't push the right boundary
             y=0.95
         ),
