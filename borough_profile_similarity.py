@@ -204,4 +204,16 @@ edges_df = pd.DataFrame(edges, columns=[
     "similarity"
 ])
 
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 5))
+plt.hist(edges_df["similarity"], bins=30, edgecolor="black", color="steelblue")
+plt.xlabel("Similarity")
+plt.ylabel("Frequency")
+plt.title("Distribution of ProfileSimilarity Values")
+plt.axvline(0, color="red", linestyle="--", linewidth=1, label="0 (no similarity)")
+plt.legend()
+plt.tight_layout()
+plt.savefig("similarity_distribution.png", dpi=300)
+
 edges_df.to_csv("data/borough_profile_similarity.csv", index=False)
