@@ -5,10 +5,10 @@ import networkx as nx
 import plotly.graph_objects as go
 
 # Load the file
-df = pd.read_csv("data/combined_aggregate_scores.csv")
+# df = pd.read_csv("data/new_combined_aggregate_scores.csv")
 
 # Standardize features (should be fine without, but just to be sure)
-features = df[["airbnb_pressure_score","housing_pressure_score","transport_accessibility_score"]]
+# features = df[["airbnb_pressure_score","housing_pressure_score","transport_pressure_score"]]
 scaler = StandardScaler()
 X = scaler.fit_transform(features)
 
